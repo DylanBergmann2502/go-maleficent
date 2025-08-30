@@ -1,0 +1,118 @@
+# Go compiled binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+main
+
+# Go test files
+*.test
+
+# Go coverage files
+*.out
+coverage.txt
+coverage.html
+
+# Go build cache
+.cache/
+
+# Go modules
+go.work
+go.work.sum
+
+# Vendor directory
+vendor/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env*
+!.env.example
+.envs/
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Testing
+test_coverage.out
+profile.out
+
+# Documentation
+docs/build/
+*.html
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Docker
+Dockerfile*
+docker-compose*
+!Dockerfile
+
+# Git
+.git/
+.gitignore
+
+# Claude Code IDE
+.claude/
+
+# Air (hot reload) temp files
+tmp/
+.air/
+
+# Node modules (if any frontend build tools)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+bin/
+!bin/.gitkeep
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+jspm_packages/
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Configuration files that shouldn't be in image
+.editorconfig
+.gitattributes
+
+# Development tools
+.pre-commit-config.yaml
+Makefile
+
+# Scripts that are host-specific
+scripts/local/
+scripts/dev/

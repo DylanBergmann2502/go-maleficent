@@ -84,7 +84,6 @@ node_modules/
 # Build output
 build/
 dist/
-bin/
 
 # Temporary files
 tmp/
