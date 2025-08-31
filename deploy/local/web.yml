@@ -1,0 +1,15 @@
+# deploy/local/web.yml
+name: go_maleficent_local
+
+services:
+  go:
+    build:
+      context: ../..
+      dockerfile: ./deploy/local/compose/go/Dockerfile
+    image: go
+    container_name: go
+    env_file:
+      - ./.envs/.go
+    ports:
+      - "8000:8000"
+    command: /start
