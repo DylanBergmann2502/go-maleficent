@@ -1,28 +1,9 @@
 # deploy/local/compose/go/Dockerfile
-FROM golang:1.25-alpine AS go-build-stage
+FROM golang:1.25-alpine
 
 # Install build dependencies
-RUN apk add --no-cache git ca-certificates tzdata
-
-WORKDIR /app
-
-# Copy go mod and sum files
-COPY go.mod go.sum ./
-
-# Download dependencies
-RUN go mod download
-
-# Copy source code
-COPY . .
-
-# Create bin directory and build the application
-RUN mkdir -p bin && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/server ./cmd/server/main.go
-
-# Production stage
-FROM alpine:latest AS go-run-stage
-
-# Install runtime dependencies
 RUN apk add --no-cache \
+    git \
     ca-certificates \
     tzdata \
     curl \
@@ -45,10 +26,21 @@ RUN addgroup -g 1000 dev-user \
 
 WORKDIR /app
 
-# Create bin directory and copy built application from build stage
-RUN mkdir -p bin
-COPY --from=go-build-stage /app/bin/server ./bin/server
-RUN chmod +x ./bin/server
+# Copy go mod and go.sum files (if exists)
+COPY go.mod ./
+COPY go.su[m] ./
+
+# Download dependencies
+RUN go mod download
+
+# Install Air globally for hot reload
+RUN go install github.com/air-verse/air@latest
+
+# Copy source code
+COPY . .
+
+# Create tmp directory for Air
+RUN mkdir -p tmp
 
 # Copy scripts
 COPY ./deploy/local/compose/go/entrypoint /entrypoint
