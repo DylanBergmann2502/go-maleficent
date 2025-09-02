@@ -2,24 +2,24 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, `{"status":"ok","message":"Go Maleficent API is running"}`)
-}
-
 func main() {
-	http.HandleFunc("/health", healthHandler)
+	e := echo.New()
 
-	port := ":8000"
-	log.Printf("Server starting on port %s", port)
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	if err := http.ListenAndServe(port, nil); err != nil {
-		log.Fatal("Server failed to start:", err)
-	}
+	e.GET("/health", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]string{
+			"status":  "ok",
+			"message": "Go Maleficent API is running",
+		})
+	})
+
+	e.Logger.Fatal(e.Start(":8000"))
 }
