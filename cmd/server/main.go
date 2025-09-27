@@ -2,13 +2,21 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/maleficent/go-maleficent/configs"
 )
 
 func main() {
+	config, err := configs.LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
@@ -21,5 +29,6 @@ func main() {
 		})
 	})
 
-	e.Logger.Fatal(e.Start(":8000"))
+	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
+	e.Logger.Fatal(e.Start(address))
 }
