@@ -6,8 +6,15 @@ type ServerConfig struct {
 	Port int    `env:"SERVER_PORT,default=8000"`
 }
 
+type LogConfig struct {
+	Level      string   `env:"LOG_LEVEL,default=info"`
+	Format     string   `env:"LOG_FORMAT,default=json"`
+	OutputPath []string `env:"LOG_OUTPUT,default=stdout"`
+}
+
 type Config struct {
 	Server ServerConfig
+	Log    LogConfig
 }
 
 func GetBaseConfig() *Config {
@@ -15,6 +22,11 @@ func GetBaseConfig() *Config {
 		Server: ServerConfig{
 			Host: "0.0.0.0",
 			Port: 8000,
+		},
+		Log: LogConfig{
+			Level:      "info",
+			Format:     "json",
+			OutputPath: []string{"stdout"},
 		},
 	}
 }

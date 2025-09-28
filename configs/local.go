@@ -4,8 +4,9 @@ package configs
 func GetLocalConfig() *Config {
 	config := GetBaseConfig()
 
-	// Local environment overrides would go here
-	// For now, just return base config
+	// Local environment overrides
+	config.Log.Level = "debug"
+	config.Log.Format = "console"
 
 	return config
 }
