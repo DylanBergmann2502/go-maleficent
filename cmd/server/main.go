@@ -29,6 +29,11 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     config.CORS.AllowOrigins,
+		AllowCredentials: config.CORS.AllowCredentials,
+		AllowHeaders:     config.CORS.AllowHeaders,
+	}))
 	e.Use(logging.ZapLoggerMiddleware(logger))
 
 	e.GET("/health", func(c echo.Context) error {

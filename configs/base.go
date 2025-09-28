@@ -12,9 +12,16 @@ type LogConfig struct {
 	OutputPath []string `env:"LOG_OUTPUT,default=stdout"`
 }
 
+type CORSConfig struct {
+	AllowOrigins     []string `env:"CORS_ALLOW_ORIGINS,default=*"`
+	AllowCredentials bool     `env:"CORS_ALLOW_CREDENTIALS,default=false"`
+	AllowHeaders     []string `env:"CORS_ALLOW_HEADERS,default=*"`
+}
+
 type Config struct {
 	Server ServerConfig
 	Log    LogConfig
+	CORS   CORSConfig
 }
 
 func GetBaseConfig() *Config {
@@ -27,6 +34,11 @@ func GetBaseConfig() *Config {
 			Level:      "info",
 			Format:     "json",
 			OutputPath: []string{"stdout"},
+		},
+		CORS: CORSConfig{
+			AllowOrigins:     []string{"*"},
+			AllowCredentials: false,
+			AllowHeaders:     []string{"*"},
 		},
 	}
 }
