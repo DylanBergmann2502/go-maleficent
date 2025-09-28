@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/maleficent/go-maleficent/configs"
+	"github.com/maleficent/go-maleficent/internal/pkg/database"
 	"github.com/maleficent/go-maleficent/internal/pkg/logging"
 	"go.uber.org/zap"
 )
@@ -24,6 +25,12 @@ func main() {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
 	defer logger.Sync()
+
+	db, err := database.NewDatabase(&config.Database, logger)
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer db.Close()
 
 	e := echo.New()
 
@@ -45,9 +52,10 @@ func main() {
 			zap.String("log_format", config.Log.Format),
 		)
 
-		return c.JSON(http.StatusOK, map[string]string{
-			"status":  "ok",
-			"message": "Go Maleficent API is running",
+		return c.JSON(http.StatusOK, map[string]any{
+			"status":   "ok",
+			"message":  "Go Maleficent API is running",
+			"database": db.GetStats(),
 		})
 	})
 
