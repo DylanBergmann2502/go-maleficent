@@ -85,6 +85,13 @@ case "$1" in
         docker compose -f $COMPOSE_FILE restart
         ;;
 
+    "format")
+        # Format Go code with goimports
+        check_docker
+        shift  # Remove 'format' from arguments
+        docker compose -f $COMPOSE_FILE run --rm go goimports -w "${@:-.}"
+        ;;
+
     *)
         echo "Go Maleficent Management Commands"
         echo "================================="
@@ -102,5 +109,6 @@ case "$1" in
         echo "  logs                - View container logs"
         echo "  ps                  - List running containers"
         echo "  restart             - Restart all containers"
+        echo "  format [path]       - Format Go code with goimports (defaults to .)"
         ;;
 esac

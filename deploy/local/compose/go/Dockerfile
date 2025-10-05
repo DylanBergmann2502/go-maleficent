@@ -36,6 +36,9 @@ RUN go mod download
 # Install Air globally for hot reload
 RUN go install github.com/air-verse/air@latest
 
+# Install goimports for formatting
+RUN go install golang.org/x/tools/cmd/goimports@latest
+
 # Copy source code
 COPY . .
 
