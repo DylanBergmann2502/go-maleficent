@@ -92,6 +92,13 @@ case "$1" in
         docker compose -f $COMPOSE_FILE run --rm go goimports -w "${@:-.}"
         ;;
 
+    "lint")
+        # Lint Go code with golangci-lint
+        check_docker
+        shift  # Remove 'lint' from arguments
+        docker compose -f $COMPOSE_FILE run --rm go golangci-lint run "${@}"
+        ;;
+
     *)
         echo "Go Maleficent Management Commands"
         echo "================================="
@@ -110,5 +117,6 @@ case "$1" in
         echo "  ps                  - List running containers"
         echo "  restart             - Restart all containers"
         echo "  format [path]       - Format Go code with goimports (defaults to .)"
+        echo "  lint [options]      - Lint Go code with golangci-lint"
         ;;
 esac
