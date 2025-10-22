@@ -11,10 +11,36 @@ import (
 	"github.com/maleficent/go-maleficent/configs"
 	"github.com/maleficent/go-maleficent/internal/pkg/database"
 	"github.com/maleficent/go-maleficent/internal/pkg/logging"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
 func main() {
+	rootCmd := &cobra.Command{
+		Use:   "server",
+		Short: "Go Maleficent - API Server and Management CLI",
+		Long:  "A comprehensive Go API server with database migrations, background workers, and more.",
+	}
+
+	rootCmd.AddCommand(apiCmd())
+
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatalf("Failed to execute command: %v", err)
+	}
+}
+
+func apiCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "api",
+		Short: "Start the API server",
+		Long:  "Start the Go Maleficent API server with all HTTP endpoints",
+		Run: func(cmd *cobra.Command, args []string) {
+			runAPIServer()
+		},
+	}
+}
+
+func runAPIServer() {
 	config, err := configs.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)

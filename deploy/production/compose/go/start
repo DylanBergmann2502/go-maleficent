@@ -1,8 +1,9 @@
 #!/bin/bash
+# deploy/production/compose/go/start
 
 set -o errexit
 set -o pipefail
 set -o nounset
 
 echo "Starting server..."
-exec /app/bin/server
+exec /app/bin/server api

@@ -3,8 +3,8 @@ tmp_dir = "tmp"
 
 [build]
   cmd = "go build -o ./tmp/main ./cmd/server/main.go"
-  bin = "./tmp/main"
-  full_bin = "./tmp/main"
+  bin = "./tmp/main api"
+  full_bin = "./tmp/main api"
   include_ext = ["go", "tpl", "tmpl", "html"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "deploy", ".git", ".github", "docs"]
   include_dir = []
