@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,6 +24,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(apiCmd())
+	rootCmd.AddCommand(migrateCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalf("Failed to execute command: %v", err)
@@ -88,4 +90,92 @@ func runAPIServer() {
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 	logging.Info(logger, "Server listening", zap.String("address", address))
 	e.Logger.Fatal(e.Start(address))
+}
+
+func migrateCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "migrate",
+		Short: "Database migration commands",
+		Long:  "Run database migrations up or down using embedded migration files",
+	}
+
+	cmd.AddCommand(migrateUpCmd())
+	cmd.AddCommand(migrateDownCmd())
+
+	return cmd
+}
+
+func migrateUpCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "up [steps]",
+		Short: "Run migrations up",
+		Long:  "Apply pending database migrations. Optionally specify number of steps.",
+		Args:  cobra.MaximumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			config, err := configs.LoadConfig()
+			if err != nil {
+				log.Fatalf("Failed to load config: %v", err)
+			}
+
+			migrator, err := database.NewMigrator(&config.Database)
+			if err != nil {
+				log.Fatalf("Failed to create migrator: %v", err)
+			}
+			defer migrator.Close()
+
+			if len(args) == 0 {
+				log.Println("Running all pending migrations...")
+				if err := migrator.Up(); err != nil {
+					log.Fatalf("Migration failed: %v", err)
+				}
+			} else {
+				steps, parseErr := strconv.Atoi(args[0])
+				if parseErr != nil {
+					log.Fatalf("Invalid steps argument: %v", parseErr)
+				}
+				log.Printf("Running %d migration(s) up...\n", steps)
+				if err := migrator.UpSteps(steps); err != nil {
+					log.Fatalf("Migration failed: %v", err)
+				}
+			}
+
+			log.Println("Migrations applied successfully")
+		},
+	}
+}
+
+func migrateDownCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "down [steps]",
+		Short: "Run migrations down",
+		Long:  "Rollback database migrations. Specify number of steps (default: 1).",
+		Args:  cobra.MaximumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			config, err := configs.LoadConfig()
+			if err != nil {
+				log.Fatalf("Failed to load config: %v", err)
+			}
+
+			migrator, err := database.NewMigrator(&config.Database)
+			if err != nil {
+				log.Fatalf("Failed to create migrator: %v", err)
+			}
+			defer migrator.Close()
+
+			steps := 1
+			if len(args) > 0 {
+				steps, err = strconv.Atoi(args[0])
+				if err != nil {
+					log.Fatalf("Invalid steps argument: %v", err)
+				}
+			}
+
+			log.Printf("Rolling back %d migration(s)...\n", steps)
+			if err := migrator.Down(steps); err != nil {
+				log.Fatalf("Migration rollback failed: %v", err)
+			}
+
+			log.Println("Migrations rolled back successfully")
+		},
+	}
 }

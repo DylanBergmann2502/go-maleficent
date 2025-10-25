@@ -27,6 +27,7 @@ RUN apk add --no-cache \
     tzdata \
     curl \
     wget \
+    bash \
     && rm -rf /var/cache/apk/*
 
 # Install wait-for-it manually
@@ -51,10 +52,8 @@ COPY ./deploy/production/compose/go/start /start
 # Remove Windows line endings and make scripts executable
 RUN sed -i 's/\r$//g' /entrypoint \
     && sed -i 's/\r$//g' /start \
-    && chmod +x /entrypoint /start
-
-# Change ownership to app user
-RUN chown -R app:app /app
+    && chmod +x /entrypoint /start \
+    && chown -R app:app /app
 
 # Switch to non-root user
 USER app

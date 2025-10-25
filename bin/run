@@ -99,6 +99,25 @@ case "$1" in
         docker compose -f $COMPOSE_FILE run --rm go golangci-lint run "${@}"
         ;;
 
+    "migrate")
+        # Run database migrations using server binary
+        check_docker
+        shift  # Remove 'migrate' from arguments
+        docker compose -f $COMPOSE_FILE run --rm go go run cmd/server/main.go migrate "$@"
+        ;;
+
+    "migrate:create")
+        # Create a new migration file using golang-migrate CLI
+        check_docker
+        if [ -z "$2" ]; then
+            echo "Error: Migration name required"
+            echo "Usage: ./bin/run migrate:create <migration_name>"
+            exit 1
+        fi
+        echo "Creating new migration: $2"
+        docker compose -f $COMPOSE_FILE run --rm go migrate create -ext sql -dir internal/pkg/database/migrations -seq $2
+        ;;
+
     *)
         echo "Go Maleficent Management Commands"
         echo "================================="
@@ -116,7 +135,14 @@ case "$1" in
         echo "  logs                - View container logs"
         echo "  ps                  - List running containers"
         echo "  restart             - Restart all containers"
+        echo ""
+        echo "Code Quality Commands:"
         echo "  format [path]       - Format Go code with goimports (defaults to .)"
         echo "  lint [options]      - Lint Go code with golangci-lint"
+        echo ""
+        echo "Migration Commands:"
+        echo "  migrate up [steps]      - Run migrations up (all or specific steps)"
+        echo "  migrate down [steps]    - Run migrations down (default: 1 step)"
+        echo "  migrate:create <name>   - Create new migration files"
         ;;
 esac

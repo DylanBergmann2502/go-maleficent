@@ -1,8 +1,12 @@
 #!/bin/bash
+# deploy/local/compose/go/start
 
 set -o errexit
 set -o pipefail
 set -o nounset
+
+echo "Running database migrations..."
+go run cmd/server/main.go migrate up
 
 echo "Starting server..."
 exec air

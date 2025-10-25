@@ -1,0 +1,13 @@
+#!/bin/bash
+# deploy/local/compose/go/migrate
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+echo "Running migrations..."
+
+# Run migrations using the Go binary
+go run cmd/server/main.go migrate up
+
+echo "Migrations completed successfully!"

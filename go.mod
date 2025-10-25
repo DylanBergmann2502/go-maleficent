@@ -4,6 +4,7 @@ module github.com/maleficent/go-maleficent
 go 1.25
 
 require (
+	github.com/golang-migrate/migrate/v4 v4.19.0
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/sethvargo/go-envconfig v1.3.0
 	github.com/spf13/cobra v1.10.1
@@ -14,6 +15,8 @@ require (
 
 require (
 	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
@@ -22,6 +25,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect

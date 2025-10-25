@@ -45,6 +45,9 @@ RUN go install golang.org/x/tools/cmd/goimports@latest
 # Install golangci-lint for linting (v2)
 RUN go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 
+# Install golang-migrate CLI for migrations
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
 # Copy source code
 COPY . .
 
@@ -54,11 +57,13 @@ RUN mkdir -p tmp
 # Copy scripts
 COPY ./deploy/local/compose/go/entrypoint /entrypoint
 COPY ./deploy/local/compose/go/start /start
+COPY ./deploy/local/compose/go/migrate /migrate
 
 # Remove Windows line endings and make scripts executable
 RUN sed -i 's/\r$//g' /entrypoint \
     && sed -i 's/\r$//g' /start \
-    && chmod +x /entrypoint /start
+    && sed -i 's/\r$//g' /migrate \
+    && chmod +x /entrypoint /start /migrate
 
 EXPOSE 8000
 
