@@ -4,8 +4,8 @@ package services
 import (
 	"errors"
 
-	"github.com/maleficent/go-maleficent/internal/app/auth/models"
-	"github.com/maleficent/go-maleficent/internal/app/auth/utils"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/models"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/utils"
 	"gorm.io/gorm"
 )
 

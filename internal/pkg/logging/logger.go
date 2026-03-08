@@ -2,7 +2,7 @@
 package logging
 
 import (
-	"github.com/maleficent/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/configs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

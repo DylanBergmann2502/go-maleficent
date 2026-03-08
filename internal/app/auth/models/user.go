@@ -2,7 +2,7 @@
 package models
 
 import (
-	"github.com/maleficent/go-maleficent/internal/pkg/models"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/models"
 )
 
 // User represents a user in the system

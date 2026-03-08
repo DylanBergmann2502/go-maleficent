@@ -6,9 +6,9 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/maleficent/go-maleficent/internal/app/auth/requests"
-	"github.com/maleficent/go-maleficent/internal/app/auth/responses"
-	"github.com/maleficent/go-maleficent/internal/app/auth/services"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/requests"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/responses"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
 )
 
 type UserHandler struct {

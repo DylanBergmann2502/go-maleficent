@@ -2,8 +2,8 @@
 package responses
 
 import (
-	"github.com/maleficent/go-maleficent/internal/app/auth/models"
-	"github.com/maleficent/go-maleficent/internal/pkg/responses"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/models"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/responses"
 )
 
 // UserResponse defines the public user output

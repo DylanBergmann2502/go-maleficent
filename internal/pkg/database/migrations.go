@@ -8,7 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	"github.com/maleficent/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/configs"
 )
 
 //go:embed migrations/*.sql

@@ -1,5 +1,5 @@
 // go.mod
-module github.com/maleficent/go-maleficent
+module github.com/DylanBergmann2502/go-maleficent
 
 go 1.25.0
 
