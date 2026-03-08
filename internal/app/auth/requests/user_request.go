@@ -1,0 +1,8 @@
+// internal/app/users/requests/user_request.go
+package requests
+
+// CreateUserRequest defines the input for user registration
+type CreateUserRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=72"`
+}

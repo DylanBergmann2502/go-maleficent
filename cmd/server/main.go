@@ -7,9 +7,12 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/maleficent/go-maleficent/configs"
+	"github.com/maleficent/go-maleficent/internal/app/auth/handlers"
+	"github.com/maleficent/go-maleficent/internal/app/auth/services"
 	"github.com/maleficent/go-maleficent/internal/pkg/database"
 	"github.com/maleficent/go-maleficent/internal/pkg/logging"
 	"github.com/spf13/cobra"
@@ -62,7 +65,7 @@ func runAPIServer() {
 
 	e := echo.New()
 
-	e.Use(middleware.Logger())
+	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     config.CORS.AllowOrigins,
@@ -70,6 +73,18 @@ func runAPIServer() {
 		AllowHeaders:     config.CORS.AllowHeaders,
 	}))
 	e.Use(logging.ZapLoggerMiddleware(logger))
+
+	validate := validator.New()
+
+	// User Resource
+	userService := services.NewUserService(db.DB)
+	userHandler := handlers.NewUserHandler(userService, validate)
+
+	// API Routes
+	api := e.Group("/api")
+	v1 := api.Group("/v1")
+	users := v1.Group("/users")
+	users.POST("/", userHandler.Create)
 
 	e.GET("/health", func(c echo.Context) error {
 		logger := logging.GetLogger(c)
