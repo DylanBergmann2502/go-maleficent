@@ -1,7 +1,7 @@
 // go.mod
 module github.com/DylanBergmann2502/go-maleficent
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/go-playground/validator/v10 v10.30.1

@@ -1,5 +1,5 @@
 # deploy/production/compose/go/Dockerfile
-FROM golang:1.25-alpine AS go-build-stage
+FROM golang:1.26-alpine AS go-build-stage
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates tzdata
