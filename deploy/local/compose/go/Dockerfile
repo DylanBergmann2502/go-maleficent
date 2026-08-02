@@ -1,5 +1,5 @@
 # deploy/local/compose/go/Dockerfile
-FROM golang:1.26-alpine
+FROM golang:1.26.5-alpine
 
 # Install build dependencies
 RUN apk add --no-cache \

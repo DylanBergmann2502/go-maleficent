@@ -33,3 +33,6 @@ script/* text eol=lf executable
 
 # Fonts
 *.woff2 filter=lfs diff=lfs merge=lfs -text
+
+# Use bd merge for beads JSONL files
+.beads/issues.jsonl merge=beads
