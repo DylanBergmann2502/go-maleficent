@@ -2,7 +2,7 @@
 package logging
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 )
 
@@ -43,7 +43,7 @@ func (l *Logger) Fatal(msg string, fields ...zap.Field) {
 // ZapLoggerMiddleware adds Zap logger to Echo context
 func ZapLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			zapLogger := &Logger{Logger: logger}
 			c.Set(LoggerKey, zapLogger)
 			return next(c)
@@ -53,7 +53,7 @@ func ZapLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 
 // GetLogger returns the logger from context as a variable for cleaner syntax
 // Usage: logger := logging.GetLogger(c); logger.Info("message")
-func GetLogger(c echo.Context) *Logger {
+func GetLogger(c *echo.Context) *Logger {
 	logger, ok := c.Get(LoggerKey).(*Logger)
 	if !ok {
 		panic("zap logger not found in context - make sure ZapLoggerMiddleware is registered")

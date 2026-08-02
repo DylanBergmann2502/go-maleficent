@@ -2,15 +2,14 @@
 package services
 
 import (
-	"errors"
-
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/models"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/utils"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrUserAlreadyExists = errors.New("user with this email already exists")
+	ErrUserAlreadyExists = errors.NewAppError(409, "user with this email already exists")
 )
 
 type UserService struct {

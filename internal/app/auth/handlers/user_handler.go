@@ -4,42 +4,42 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/requests"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v5"
 )
 
 type UserHandler struct {
+	*handlers.BaseHandler
 	service   *services.UserService
 	validator *validator.Validate
 }
 
 func NewUserHandler(service *services.UserService, v *validator.Validate) *UserHandler {
 	return &UserHandler{
-		service:   service,
-		validator: v,
+		BaseHandler: &handlers.BaseHandler{},
+		service:     service,
+		validator:   v,
 	}
 }
 
-// Create handles user registration
-func (h *UserHandler) Create(c echo.Context) error {
+func (h *UserHandler) Create(c *echo.Context) error {
 	var req requests.CreateUserRequest
 	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+		return h.HandleError(c, errors.ErrBadRequest)
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+		return h.HandleError(c, errors.NewAppError(422, err.Error()))
 	}
 
 	user, err := h.service.CreateUser(req.Email, req.Password)
 	if err != nil {
-		if err == services.ErrUserAlreadyExists {
-			return echo.NewHTTPError(http.StatusConflict, err.Error())
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create user")
+		return h.HandleError(c, err)
 	}
 
 	return c.JSON(http.StatusCreated, responses.FromModel(user))

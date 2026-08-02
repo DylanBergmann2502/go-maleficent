@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/DylanBergmann2502/go-maleficent/configs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/handlers"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -86,7 +86,7 @@ func runAPIServer() {
 	users := v1.Group("/users")
 	users.POST("/", userHandler.Create)
 
-	e.GET("/health", func(c echo.Context) error {
+	e.GET("/health", func(c *echo.Context) error {
 		logger := logging.GetLogger(c)
 		logger.Info("Health check endpoint hit",
 			zap.String("host", config.Server.Host),
@@ -104,7 +104,9 @@ func runAPIServer() {
 
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 	logging.Info(logger, "Server listening", zap.String("address", address))
-	e.Logger.Fatal(e.Start(address))
+	if err := e.Start(address); err != nil {
+		logging.Fatal(logger, "Server stopped", zap.Error(err))
+	}
 }
 
 func migrateCmd() *cobra.Command {
