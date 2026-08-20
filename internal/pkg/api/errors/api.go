@@ -64,6 +64,22 @@ func ToHumaError(ctx context.Context, err error) error {
 	return NewHumaError(ctx, apiErr.Status, apiErr.Code, apiErr.Message, apiErr.Details)
 }
 
+// FromHumaErrors translates application errors returned by an application
+// service, while preserving Huma's own transport-validation errors.
+func FromHumaErrors(ctx context.Context, status int, message string, errs ...error) huma.StatusError {
+	for _, err := range errs {
+		var appErr *apperrors.ApplicationError
+		if !stderrors.As(err, &appErr) {
+			continue
+		}
+
+		apiErr := FromError(err)
+		return NewHumaError(ctx, apiErr.Status, apiErr.Code, apiErr.Message, apiErr.Details)
+	}
+
+	return NewHumaError(ctx, status, "", message, HumaDetails(errs...))
+}
+
 func codeForStatus(status int) string {
 	switch status {
 	case http.StatusBadRequest:

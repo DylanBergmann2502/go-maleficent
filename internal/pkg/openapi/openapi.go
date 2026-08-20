@@ -18,7 +18,7 @@ func New(e *echo.Echo) huma.API {
 		return apierrors.NewHumaError(context.TODO(), status, "", message, apierrors.HumaDetails(errs...))
 	}
 	huma.NewErrorWithContext = func(ctx huma.Context, status int, message string, errs ...error) huma.StatusError {
-		return apierrors.NewHumaError(ctx.Context(), status, "", message, apierrors.HumaDetails(errs...))
+		return apierrors.FromHumaErrors(ctx.Context(), status, message, errs...)
 	}
 
 	api := humaecho.New(e, huma.Config{

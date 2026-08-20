@@ -1,65 +1,61 @@
-// internal/app/users/services/user_service.go
+// internal/app/auth/services/user_service.go
 package services
 
 import (
 	stderrors "errors"
 
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/checks"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/forms"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/models"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/utils"
 	apperrors "github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
-var (
-	ErrUserAlreadyExists = apperrors.NewApplicationError(
-		apperrors.ErrConflictCategory,
-		"user_already_exists",
-		"user with this email already exists",
-		nil,
-	)
-)
-
 type UserService struct {
-	db *gorm.DB
+	db        *gorm.DB
+	validator *validator.Validate
 }
 
-func NewUserService(db *gorm.DB) *UserService {
-	return &UserService{db: db}
+func NewUserService(db *gorm.DB, v *validator.Validate) *UserService {
+	return &UserService{db: db, validator: v}
 }
 
 // CreateUser handles the business logic of registering a new user
 func (s *UserService) CreateUser(email, password string) (*models.User, error) {
-	// 1. Check if user exists
-	var count int64
-	if err := s.db.Model(&models.User{}).Where("email = ?", email).Count(&count).Error; err != nil {
-		return nil, apperrors.WrapApplicationError(
-			err,
-			apperrors.ErrInternalCategory,
-			"database_error",
-			"failed to check whether user exists",
-			nil,
-		)
+	form := forms.NewCreateUserForm(email, password)
+	if err := form.Validate(s.validator); err != nil {
+		return nil, err
 	}
-	if count > 0 {
-		return nil, ErrUserAlreadyExists
-	}
-
-	// 2. Hash password
-	hashedPassword, err := utils.HashPassword(password)
-	if err != nil {
+	if err := checks.EnsureEmailAvailable(s.db, form.Email); err != nil {
 		return nil, err
 	}
 
-	// 3. Create user model
+	hashedPassword, err := utils.HashPassword(form.Password)
+	if err != nil {
+		return nil, apperrors.WrapApplicationError(
+			err,
+			apperrors.ErrInternalCategory,
+			"password_hash_failed",
+			"failed to hash password",
+			nil,
+		)
+	}
+
 	user := &models.User{
-		Email:        email,
+		Email:        form.Email,
 		PasswordHash: hashedPassword,
 	}
 
-	// 4. Save to DB
 	if err := s.db.Create(user).Error; err != nil {
 		if stderrors.Is(err, gorm.ErrDuplicatedKey) {
-			return nil, ErrUserAlreadyExists
+			return nil, checks.ErrEmailAlreadyRegistered
+		}
+
+		var appErr *apperrors.ApplicationError
+		if stderrors.As(err, &appErr) {
+			return nil, err
 		}
 
 		return nil, apperrors.WrapApplicationError(

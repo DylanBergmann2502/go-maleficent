@@ -89,8 +89,8 @@ func runAPIServer() {
 	validate := validator.New()
 
 	// User Resource
-	userService := services.NewUserService(db.DB)
-	userHandler := handlers.NewUserHandler(userService, validate)
+	userService := services.NewUserService(db.DB, validate)
+	userHandler := handlers.NewUserHandler(userService)
 
 	humaAPI := openapi.New(e)
 	auth.RegisterRoutes(humaAPI, userHandler)
