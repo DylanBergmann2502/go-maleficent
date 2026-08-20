@@ -58,12 +58,14 @@ RUN mkdir -p tmp
 COPY ./deploy/local/compose/go/entrypoint /entrypoint
 COPY ./deploy/local/compose/go/start /start
 COPY ./deploy/local/compose/go/migrate /migrate
+COPY ./deploy/local/compose/go/test /test
 
 # Remove Windows line endings and make scripts executable
 RUN sed -i 's/\r$//g' /entrypoint \
     && sed -i 's/\r$//g' /start \
     && sed -i 's/\r$//g' /migrate \
-    && chmod +x /entrypoint /start /migrate
+    && sed -i 's/\r$//g' /test \
+    && chmod +x /entrypoint /start /migrate /test
 
 EXPOSE 8000
 

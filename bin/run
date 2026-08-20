@@ -99,6 +99,12 @@ case "$1" in
         docker compose -f $COMPOSE_FILE run --rm go golangci-lint run "${@}"
         ;;
 
+    "test")
+        # Run the Docker test profile against the isolated test database
+        check_docker
+        docker compose -f "$COMPOSE_FILE" --profile test run --build --rm go_test
+        ;;
+
     "deps")
         # Add or update Go module dependencies inside the Go container
         check_docker
@@ -151,6 +157,7 @@ case "$1" in
         echo "Code Quality Commands:"
         echo "  format [path]       - Format Go code with goimports (defaults to .)"
         echo "  lint [options]      - Lint Go code with golangci-lint"
+        echo "  test                - Run the Docker test profile"
         echo "  deps <module>...    - Add or update Go module dependencies"
         echo ""
         echo "Migration Commands:"

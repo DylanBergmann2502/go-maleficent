@@ -1,0 +1,3 @@
+# deploy/local/.envs/.go_test
+GO_ENV=test
+DB_ADMIN_NAME=postgres

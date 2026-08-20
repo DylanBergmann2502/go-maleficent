@@ -1,0 +1,41 @@
+#!/bin/bash
+# deploy/local/compose/go/test
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+echo "Ensuring test database exists..."
+
+base_database_name="$DB_NAME"
+test_database_name="${base_database_name%_test}_test"
+
+if [[ ! "$test_database_name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    echo "Error: DB_NAME must be a valid PostgreSQL database name"
+    exit 1
+fi
+
+database_exists=$(PGPASSWORD="$DB_PASSWORD" psql \
+    --host "$DB_HOST" \
+    --port "$DB_PORT" \
+    --username "$DB_USER" \
+    --dbname "${DB_ADMIN_NAME:-postgres}" \
+    --tuples-only \
+    --no-align \
+    --command "SELECT 1 FROM pg_database WHERE datname = '$test_database_name';")
+
+if [ "$database_exists" != "1" ]; then
+    PGPASSWORD="$DB_PASSWORD" createdb \
+        --host "$DB_HOST" \
+        --port "$DB_PORT" \
+        --username "$DB_USER" \
+        "$test_database_name"
+fi
+
+export DB_NAME="$test_database_name"
+
+echo "Running test database migrations..."
+go run cmd/server/main.go migrate up
+
+echo "Running Go tests..."
+go test ./...
