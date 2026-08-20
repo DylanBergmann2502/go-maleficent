@@ -20,7 +20,7 @@ func (l *Logger) Info(msg string, fields ...zap.Field) {
 
 // Error logs an error level message with caller info
 func (l *Logger) Error(msg string, fields ...zap.Field) {
-	loggerWithCaller := l.Logger.WithOptions(zap.AddCaller())
+	loggerWithCaller := l.WithOptions(zap.AddCaller())
 	loggerWithCaller.Error(msg, fields...)
 }
 
@@ -36,7 +36,7 @@ func (l *Logger) Warn(msg string, fields ...zap.Field) {
 
 // Fatal logs a fatal level message with caller info
 func (l *Logger) Fatal(msg string, fields ...zap.Field) {
-	loggerWithCaller := l.Logger.WithOptions(zap.AddCaller())
+	loggerWithCaller := l.WithOptions(zap.AddCaller())
 	loggerWithCaller.Fatal(msg, fields...)
 }
 

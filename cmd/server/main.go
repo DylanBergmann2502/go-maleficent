@@ -56,13 +56,21 @@ func runAPIServer() {
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			log.Printf("Failed to sync logger: %v", err)
+		}
+	}()
 
 	db, err := database.NewDatabase(&config.Database, logger)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("Failed to close database: %v", err)
+		}
+	}()
 
 	e := echo.New()
 
@@ -140,7 +148,11 @@ func migrateUpCmd() *cobra.Command {
 			if err != nil {
 				log.Fatalf("Failed to create migrator: %v", err)
 			}
-			defer migrator.Close()
+			defer func() {
+				if err := migrator.Close(); err != nil {
+					log.Printf("Failed to close migrator: %v", err)
+				}
+			}()
 
 			if len(args) == 0 {
 				log.Println("Running all pending migrations...")
@@ -179,7 +191,11 @@ func migrateDownCmd() *cobra.Command {
 			if err != nil {
 				log.Fatalf("Failed to create migrator: %v", err)
 			}
-			defer migrator.Close()
+			defer func() {
+				if err := migrator.Close(); err != nil {
+					log.Printf("Failed to close migrator: %v", err)
+				}
+			}()
 
 			steps := 1
 			if len(args) > 0 {
