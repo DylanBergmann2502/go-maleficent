@@ -2,14 +2,21 @@
 package services
 
 import (
+	stderrors "errors"
+
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/models"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/utils"
-	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
+	apperrors "github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrUserAlreadyExists = errors.NewAppError(409, "user with this email already exists")
+	ErrUserAlreadyExists = apperrors.NewApplicationError(
+		apperrors.ErrConflictCategory,
+		"user_already_exists",
+		"user with this email already exists",
+		nil,
+	)
 )
 
 type UserService struct {
@@ -24,7 +31,15 @@ func NewUserService(db *gorm.DB) *UserService {
 func (s *UserService) CreateUser(email, password string) (*models.User, error) {
 	// 1. Check if user exists
 	var count int64
-	s.db.Model(&models.User{}).Where("email = ?", email).Count(&count)
+	if err := s.db.Model(&models.User{}).Where("email = ?", email).Count(&count).Error; err != nil {
+		return nil, apperrors.WrapApplicationError(
+			err,
+			apperrors.ErrInternalCategory,
+			"database_error",
+			"failed to check whether user exists",
+			nil,
+		)
+	}
 	if count > 0 {
 		return nil, ErrUserAlreadyExists
 	}
@@ -43,7 +58,17 @@ func (s *UserService) CreateUser(email, password string) (*models.User, error) {
 
 	// 4. Save to DB
 	if err := s.db.Create(user).Error; err != nil {
-		return nil, err
+		if stderrors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, ErrUserAlreadyExists
+		}
+
+		return nil, apperrors.WrapApplicationError(
+			err,
+			apperrors.ErrInternalCategory,
+			"database_error",
+			"failed to create user",
+			nil,
+		)
 	}
 
 	return user, nil

@@ -7,9 +7,9 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/requests"
 	userresponses "github.com/DylanBergmann2502/go-maleficent/internal/app/auth/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
+	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/api/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
-	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/responses"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 )
@@ -35,7 +35,7 @@ func (h *UserHandler) Create(c *echo.Context) error {
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return h.HandleError(c, errors.NewAppError(422, err.Error()))
+		return h.HandleError(c, errors.NewApplicationError(errors.ErrValidationCategory, "validation_failed", "validation failed", err.Error()))
 	}
 
 	user, err := h.service.CreateUser(req.Email, req.Password)

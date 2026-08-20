@@ -19,9 +19,7 @@ type Database struct {
 func NewDatabase(config *configs.DatabaseConfig, logger *zap.Logger) (*Database, error) {
 	dsn := buildDSN(config)
 
-	gormConfig := &gorm.Config{
-		// Keep GORM simple - let it use defaults
-	}
+	gormConfig := &gorm.Config{TranslateError: true}
 
 	db, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {

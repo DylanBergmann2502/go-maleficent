@@ -1,4 +1,4 @@
-// internal/pkg/responses/envelope.go
+// internal/pkg/api/responses/envelope.go
 package responses
 
 import (

@@ -1,4 +1,4 @@
-// internal/pkg/responses/base.go
+// internal/pkg/api/responses/base.go
 package responses
 
 import (
@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// BaseResponse contains common response fields
+// BaseResponse contains common response fields.
 type BaseResponse struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
