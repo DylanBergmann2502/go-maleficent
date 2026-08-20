@@ -5,10 +5,11 @@ import (
 	"net/http"
 
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/requests"
-	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/responses"
+	userresponses "github.com/DylanBergmann2502/go-maleficent/internal/app/auth/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
+	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/responses"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 )
@@ -42,5 +43,5 @@ func (h *UserHandler) Create(c *echo.Context) error {
 		return h.HandleError(c, err)
 	}
 
-	return c.JSON(http.StatusCreated, responses.FromModel(user))
+	return c.JSON(http.StatusCreated, apiresponses.Success(c, userresponses.FromModel(user)))
 }

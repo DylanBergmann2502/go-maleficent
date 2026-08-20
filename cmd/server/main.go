@@ -12,6 +12,7 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
+	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/responses"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
@@ -65,6 +66,7 @@ func runAPIServer() {
 
 	e := echo.New()
 
+	e.Use(middleware.RequestID())
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -95,11 +97,11 @@ func runAPIServer() {
 			zap.String("log_format", config.Log.Format),
 		)
 
-		return c.JSON(http.StatusOK, map[string]any{
+		return c.JSON(http.StatusOK, apiresponses.Success(c, map[string]any{
 			"status":   "ok",
 			"message":  "Go Maleficent API is running",
 			"database": db.GetStats(),
-		})
+		}))
 	})
 
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
