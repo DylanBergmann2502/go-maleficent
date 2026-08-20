@@ -2,16 +2,16 @@
 package handlers
 
 import (
-	"net/http"
+	"context"
 
-	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/requests"
-	userresponses "github.com/DylanBergmann2502/go-maleficent/internal/app/auth/responses"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/inputs"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/outputs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
+	apierrors "github.com/DylanBergmann2502/go-maleficent/internal/pkg/api/errors"
 	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/api/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v5"
 )
 
 type UserHandler struct {
@@ -28,20 +28,20 @@ func NewUserHandler(service *services.UserService, v *validator.Validate) *UserH
 	}
 }
 
-func (h *UserHandler) Create(c *echo.Context) error {
-	var req requests.CreateUserRequest
-	if err := c.Bind(&req); err != nil {
-		return h.HandleError(c, errors.ErrBadRequest)
+func (h *UserHandler) Create(ctx context.Context, input *inputs.CreateUserInput) (*outputs.CreateUserOutput, error) {
+	if err := h.validator.Struct(input.Body); err != nil {
+		return nil, apierrors.ToHumaError(ctx,
+			errors.NewApplicationError(errors.ErrValidationCategory, "validation_failed", "validation failed", err.Error()),
+		)
 	}
 
-	if err := h.validator.Struct(req); err != nil {
-		return h.HandleError(c, errors.NewApplicationError(errors.ErrValidationCategory, "validation_failed", "validation failed", err.Error()))
-	}
-
-	user, err := h.service.CreateUser(req.Email, req.Password)
+	user, err := h.service.CreateUser(input.Body.Email, input.Body.Password)
 	if err != nil {
-		return h.HandleError(c, err)
+		return nil, apierrors.ToHumaError(ctx, err)
 	}
 
-	return c.JSON(http.StatusCreated, apiresponses.Success(c, userresponses.FromModel(user)))
+	output := &outputs.CreateUserOutput{}
+	output.Body.Data = outputs.FromModel(user)
+	output.Body.Meta = apiresponses.NewMetaDataFromContext(ctx)
+	return output, nil
 }

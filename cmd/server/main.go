@@ -8,11 +8,13 @@ import (
 	"strconv"
 
 	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/handlers"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
 	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/api/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/openapi"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
@@ -90,11 +92,8 @@ func runAPIServer() {
 	userService := services.NewUserService(db.DB)
 	userHandler := handlers.NewUserHandler(userService, validate)
 
-	// API Routes
-	api := e.Group("/api")
-	v1 := api.Group("/v1")
-	users := v1.Group("/users")
-	users.POST("/", userHandler.Create)
+	humaAPI := openapi.New(e)
+	auth.RegisterRoutes(humaAPI, userHandler)
 
 	e.GET("/health", func(c *echo.Context) error {
 		logger := logging.GetLogger(c)

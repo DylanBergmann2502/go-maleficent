@@ -99,6 +99,18 @@ case "$1" in
         docker compose -f $COMPOSE_FILE run --rm go golangci-lint run "${@}"
         ;;
 
+    "deps")
+        # Add or update Go module dependencies inside the Go container
+        check_docker
+        shift  # Remove 'deps' from arguments
+        if [ "$#" -eq 0 ]; then
+            echo "Error: At least one Go module is required"
+            echo "Usage: ./bin/run deps <module>[@version] [module[@version] ...]"
+            exit 1
+        fi
+        docker compose -f "$COMPOSE_FILE" run --rm go go get "$@"
+        ;;
+
     "migrate")
         # Run database migrations using server binary
         check_docker
@@ -139,6 +151,7 @@ case "$1" in
         echo "Code Quality Commands:"
         echo "  format [path]       - Format Go code with goimports (defaults to .)"
         echo "  lint [options]      - Lint Go code with golangci-lint"
+        echo "  deps <module>...    - Add or update Go module dependencies"
         echo ""
         echo "Migration Commands:"
         echo "  migrate up [steps]      - Run migrations up (all or specific steps)"
