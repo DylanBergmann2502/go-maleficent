@@ -49,6 +49,22 @@ func New(e *echo.Echo) huma.API {
 	e.GET("/swagger", func(c *echo.Context) error {
 		return c.Redirect(http.StatusMovedPermanently, "/swaggerui")
 	})
+	e.GET("/redoc", func(c *echo.Context) error {
+		return c.HTML(http.StatusOK, redocHTML)
+	})
 
 	return api
 }
+
+const redocHTML = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Go Maleficent API Reference</title>
+</head>
+<body>
+  <redoc spec-url="/api/openapi.json"></redoc>
+  <script src="https://cdn.jsdelivr.net/npm/redoc@2.5.0/bundles/redoc.standalone.js"></script>
+</body>
+</html>`
