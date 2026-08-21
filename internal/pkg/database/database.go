@@ -3,9 +3,9 @@ package database
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/DylanBergmann2502/go-maleficent/configs"
-	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,10 +13,10 @@ import (
 type Database struct {
 	*gorm.DB
 	config *configs.DatabaseConfig
-	logger *zap.Logger
+	logger *slog.Logger
 }
 
-func NewDatabase(config *configs.DatabaseConfig, logger *zap.Logger) (*Database, error) {
+func NewDatabase(config *configs.DatabaseConfig, logger *slog.Logger) (*Database, error) {
 	dsn := buildDSN(config)
 
 	gormConfig := &gorm.Config{TranslateError: true}
@@ -44,14 +44,14 @@ func NewDatabase(config *configs.DatabaseConfig, logger *zap.Logger) (*Database,
 	}
 
 	logger.Info("Database connection established successfully",
-		zap.String("host", config.Host),
-		zap.Int("port", config.Port),
-		zap.String("database", config.Database),
-		zap.String("user", config.User),
-		zap.Int("max_open_conns", config.MaxOpenConns),
-		zap.Int("max_idle_conns", config.MaxIdleConns),
-		zap.Duration("conn_max_lifetime", config.ConnMaxLifetime),
-		zap.Duration("conn_max_idle_time", config.ConnMaxIdleTime),
+		"host", config.Host,
+		"port", config.Port,
+		"database", config.Database,
+		"user", config.User,
+		"max_open_conns", config.MaxOpenConns,
+		"max_idle_conns", config.MaxIdleConns,
+		"conn_max_lifetime", config.ConnMaxLifetime,
+		"conn_max_idle_time", config.ConnMaxIdleTime,
 	)
 
 	return &Database{

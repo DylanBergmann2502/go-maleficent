@@ -2,13 +2,14 @@
 package testutil
 
 import (
+	"io"
+	"log/slog"
 	"os"
 	"testing"
 
 	"github.com/DylanBergmann2502/go-maleficent/configs"
 	databasepkg "github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +22,7 @@ func NewDatabaseClient(t *testing.T) *databasepkg.Database {
 	config, err := configs.LoadConfig()
 	require.NoError(t, err)
 
-	database, err := databasepkg.NewDatabase(&config.Database, zap.NewNop())
+	database, err := databasepkg.NewDatabase(&config.Database, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.NoError(t, err)
 
 	t.Cleanup(func() {

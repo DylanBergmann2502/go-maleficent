@@ -6,7 +6,6 @@ import (
 
 	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/api/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
-	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
 	"github.com/labstack/echo/v5"
 )
 
@@ -42,9 +41,6 @@ func (h *HealthHandler) Ping(c *echo.Context) error {
 
 // Check verifies that the application can reach its database.
 func (h *HealthHandler) Check(c *echo.Context) error {
-	logger := logging.GetLogger(c)
-	logger.Info("Health check endpoint hit")
-
 	if err := h.db.Exec("SELECT 1").Error; err != nil {
 		return c.JSON(http.StatusServiceUnavailable, apiresponses.Error(
 			c,

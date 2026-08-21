@@ -2,97 +2,98 @@
 package logging
 
 import (
+	"context"
+	"io"
+	"log/slog"
+	"os"
+	"strings"
+
 	"github.com/DylanBergmann2502/go-maleficent/configs"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
-func customColorLevelEncoder(level zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-	switch level {
-	case zapcore.DebugLevel:
-		enc.AppendString("\033[37mDEBUG\033[0m") // White/Gray (default)
-	case zapcore.InfoLevel:
-		enc.AppendString("\033[32mINFO\033[0m") // Green (custom)
-	case zapcore.WarnLevel:
-		enc.AppendString("\033[33mWARN\033[0m") // Yellow
-	case zapcore.ErrorLevel:
-		enc.AppendString("\033[31mERROR\033[0m") // Red
-	case zapcore.FatalLevel:
-		enc.AppendString("\033[35mFATAL\033[0m") // Magenta
-	default:
-		enc.AppendString(level.CapitalString())
+// NewLogger creates a structured application logger.
+func NewLogger(logConfig *configs.LogConfig) (*slog.Logger, error) {
+	options := &slog.HandlerOptions{Level: getLogLevel(logConfig.Level)}
+	writer, err := outputWriter(logConfig.OutputPath)
+	if err != nil {
+		return nil, err
 	}
-}
-
-func NewLogger(logConfig *configs.LogConfig) (*zap.Logger, error) {
-	var config zap.Config
 
 	if logConfig.Format == "console" {
-		config = zap.NewDevelopmentConfig()
-		config.EncoderConfig.EncodeLevel = customColorLevelEncoder
-	} else {
-		config = zap.NewProductionConfig()
+		return slog.New(slog.NewTextHandler(writer, options)), nil
 	}
+	return slog.New(slog.NewJSONHandler(writer, options)), nil
+}
 
-	config.Level = zap.NewAtomicLevelAt(getLogLevel(logConfig.Level))
-	config.OutputPaths = logConfig.OutputPath
-	config.ErrorOutputPaths = []string{"stderr"}
-
-	logger, err := config.Build(zap.AddCallerSkip(0))
+// NewLoggerWithCaller creates a logger that includes source locations.
+func NewLoggerWithCaller(logConfig *configs.LogConfig) (*slog.Logger, error) {
+	options := &slog.HandlerOptions{
+		Level:     getLogLevel(logConfig.Level),
+		AddSource: true,
+	}
+	writer, err := outputWriter(logConfig.OutputPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return logger.WithOptions(
-		zap.AddStacktrace(zapcore.ErrorLevel),
-		zap.WithCaller(false),
-	), nil
-}
-
-func NewLoggerWithCaller(logConfig *configs.LogConfig) (*zap.Logger, error) {
-	logger, err := NewLogger(logConfig)
-	if err != nil {
-		return nil, err
+	if logConfig.Format == "console" {
+		return slog.New(slog.NewTextHandler(writer, options)), nil
 	}
-
-	return logger.WithOptions(zap.AddCaller()), nil
+	return slog.New(slog.NewJSONHandler(writer, options)), nil
 }
 
-func getLogLevel(level string) zapcore.Level {
-	switch level {
+func getLogLevel(level string) slog.Level {
+	switch strings.ToLower(level) {
 	case "debug":
-		return zapcore.DebugLevel
-	case "info":
-		return zapcore.InfoLevel
-	case "warn":
-		return zapcore.WarnLevel
-	case "error":
-		return zapcore.ErrorLevel
-	case "fatal":
-		return zapcore.FatalLevel
+		return slog.LevelDebug
+	case "warn", "warning":
+		return slog.LevelWarn
+	case "error", "fatal":
+		return slog.LevelError
 	default:
-		return zapcore.InfoLevel
+		return slog.LevelInfo
 	}
 }
 
-func Info(logger *zap.Logger, msg string, fields ...zap.Field) {
-	logger.Info(msg, fields...)
+func outputWriter(paths []string) (io.Writer, error) {
+	if len(paths) == 0 {
+		return os.Stdout, nil
+	}
+
+	writers := make([]io.Writer, 0, len(paths))
+	for _, path := range paths {
+		switch path {
+		case "stdout":
+			writers = append(writers, os.Stdout)
+		case "stderr":
+			writers = append(writers, os.Stderr)
+		default:
+			file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+			if err != nil {
+				return nil, err
+			}
+			writers = append(writers, file)
+		}
+	}
+
+	if len(writers) == 1 {
+		return writers[0], nil
+	}
+	return io.MultiWriter(writers...), nil
 }
 
-func Error(logger *zap.Logger, msg string, fields ...zap.Field) {
-	loggerWithCaller := logger.WithOptions(zap.AddCaller())
-	loggerWithCaller.Error(msg, fields...)
+func Info(logger *slog.Logger, message string, attrs ...slog.Attr) {
+	logger.LogAttrs(context.Background(), slog.LevelInfo, message, attrs...)
 }
 
-func Debug(logger *zap.Logger, msg string, fields ...zap.Field) {
-	logger.Debug(msg, fields...)
+func Error(logger *slog.Logger, message string, attrs ...slog.Attr) {
+	logger.LogAttrs(context.Background(), slog.LevelError, message, attrs...)
 }
 
-func Warn(logger *zap.Logger, msg string, fields ...zap.Field) {
-	logger.Warn(msg, fields...)
+func Debug(logger *slog.Logger, message string, attrs ...slog.Attr) {
+	logger.LogAttrs(context.Background(), slog.LevelDebug, message, attrs...)
 }
 
-func Fatal(logger *zap.Logger, msg string, fields ...zap.Field) {
-	loggerWithCaller := logger.WithOptions(zap.AddCaller())
-	loggerWithCaller.Fatal(msg, fields...)
+func Warn(logger *slog.Logger, message string, attrs ...slog.Attr) {
+	logger.LogAttrs(context.Background(), slog.LevelWarn, message, attrs...)
 }

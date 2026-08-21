@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"strconv"
 
 	"github.com/DylanBergmann2502/go-maleficent/configs"
@@ -18,7 +19,6 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -57,11 +57,6 @@ func runAPIServer() {
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
-	defer func() {
-		if err := logger.Sync(); err != nil {
-			log.Printf("Failed to sync logger: %v", err)
-		}
-	}()
 
 	db, err := database.NewDatabase(&config.Database, logger)
 	if err != nil {
@@ -83,7 +78,7 @@ func runAPIServer() {
 		AllowCredentials: config.CORS.AllowCredentials,
 		AllowHeaders:     config.CORS.AllowHeaders,
 	}))
-	e.Use(logging.ZapLoggerMiddleware(logger))
+	e.Use(logging.SlogLoggerMiddleware(logger))
 
 	validate := validator.New()
 
@@ -97,9 +92,9 @@ func runAPIServer() {
 	apphandlers.RegisterRoutes(e, db)
 
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
-	logging.Info(logger, "Server listening", zap.String("address", address))
+	logging.Info(logger, "Server listening", slog.String("address", address))
 	if err := e.Start(address); err != nil {
-		logging.Fatal(logger, "Server stopped", zap.Error(err))
+		logging.Error(logger, "Server stopped", slog.Any("error", err))
 	}
 }
 
