@@ -60,17 +60,20 @@ func TestLoadConfigDoesNotDuplicateTestDatabaseSuffix(t *testing.T) {
 func TestLoadConfigUsesLocalOverrides(t *testing.T) {
 	setRequiredDatabaseEnvironment(t)
 	t.Setenv("GO_ENV", "local")
+	t.Setenv("PPROF_ENDPOINTS_ENABLED", "true")
 
 	config, err := LoadConfig()
 
 	require.NoError(t, err)
 	assert.Equal(t, "debug", config.Log.Level)
 	assert.Equal(t, "console", config.Log.Format)
+	assert.True(t, config.Debug.PprofEndpointsEnabled)
 }
 
 func TestLoadConfigParsesEnvironmentOverrides(t *testing.T) {
 	setRequiredDatabaseEnvironment(t)
 	t.Setenv("GO_ENV", "production")
+	t.Setenv("PPROF_ENDPOINTS_ENABLED", "false")
 	t.Setenv("DB_PORT", "6432")
 	t.Setenv("DB_MAX_OPEN_CONNS", "40")
 	t.Setenv("DB_CONN_MAX_LIFETIME", "2m")
@@ -81,6 +84,7 @@ func TestLoadConfigParsesEnvironmentOverrides(t *testing.T) {
 	assert.Equal(t, 6432, config.Database.Port)
 	assert.Equal(t, 40, config.Database.MaxOpenConns)
 	assert.Equal(t, 2*time.Minute, config.Database.ConnMaxLifetime)
+	assert.False(t, config.Debug.PprofEndpointsEnabled)
 }
 
 func TestLoadConfigRejectsMissingRequiredEnvironment(t *testing.T) {

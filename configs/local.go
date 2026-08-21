@@ -7,6 +7,7 @@ func GetLocalConfig() *Config {
 	// Local environment overrides
 	config.Log.Level = "debug"
 	config.Log.Format = "console"
+	config.Debug.PprofEndpointsEnabled = true
 
 	return config
 }

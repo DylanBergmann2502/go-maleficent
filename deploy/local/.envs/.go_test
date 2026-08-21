@@ -1,3 +1,4 @@
 # deploy/local/.envs/.go_test
 GO_ENV=test
+PPROF_ENDPOINTS_ENABLED=false
 DB_ADMIN_NAME=postgres

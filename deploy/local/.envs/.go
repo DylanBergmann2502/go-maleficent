@@ -1,5 +1,6 @@
 # deploy/local/.envs/.go
 GO_ENV=local
+PPROF_ENDPOINTS_ENABLED=true
 
 # Database Configuration
 # ------------------------------------------------------------------------------

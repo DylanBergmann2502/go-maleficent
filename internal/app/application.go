@@ -9,6 +9,7 @@ import (
 	authhandlers "github.com/DylanBergmann2502/go-maleficent/internal/app/auth/handlers"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
+	debug "github.com/DylanBergmann2502/go-maleficent/internal/pkg/debug"
 	apphandlers "github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/openapi"
@@ -44,6 +45,7 @@ func New(config *configs.Config, logger *slog.Logger, db *database.Database) *Ap
 	humaAPI := openapi.New(e)
 	auth.RegisterRoutes(humaAPI, userHandler)
 	apphandlers.RegisterRoutes(e, db)
+	debug.RegisterRoutes(e, config.Debug.PprofEndpointsEnabled)
 
 	return &Application{Echo: e}
 }

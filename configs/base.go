@@ -39,11 +39,16 @@ type CORSConfig struct {
 	AllowHeaders     []string `env:"CORS_ALLOW_HEADERS,overwrite,default=*"`
 }
 
+type DebugConfig struct {
+	PprofEndpointsEnabled bool `env:"PPROF_ENDPOINTS_ENABLED,overwrite,default=false"`
+}
+
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	Log      LogConfig
 	CORS     CORSConfig
+	Debug    DebugConfig
 }
 
 func GetBaseConfig() *Config {
@@ -69,6 +74,9 @@ func GetBaseConfig() *Config {
 			AllowOrigins:     []string{"*"},
 			AllowCredentials: false,
 			AllowHeaders:     []string{"*"},
+		},
+		Debug: DebugConfig{
+			PprofEndpointsEnabled: false,
 		},
 	}
 }

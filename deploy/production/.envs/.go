@@ -1,5 +1,6 @@
 # deploy/production/.envs/.go
 GO_ENV=production
+PPROF_ENDPOINTS_ENABLED=false
 
 # Database Configuration
 # ------------------------------------------------------------------------------
