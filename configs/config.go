@@ -4,7 +4,6 @@ package configs
 import (
 	"context"
 	"os"
-	"strings"
 
 	"github.com/sethvargo/go-envconfig"
 )
@@ -35,8 +34,8 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	if env == "test" && !strings.HasSuffix(config.Database.Database, "_test") {
-		config.Database.Database += "_test"
+	if env == "test" {
+		applyTestDatabaseName(config)
 	}
 
 	return config, nil

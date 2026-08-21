@@ -4,8 +4,8 @@ package configs
 import "time"
 
 type ServerConfig struct {
-	Host string `env:"SERVER_HOST,default=0.0.0.0"`
-	Port int    `env:"SERVER_PORT,default=8000"`
+	Host string `env:"SERVER_HOST,overwrite,default=0.0.0.0"`
+	Port int    `env:"SERVER_PORT,overwrite,default=8000"`
 }
 
 type DatabaseConfig struct {
@@ -17,26 +17,26 @@ type DatabaseConfig struct {
 	Password string `env:"DB_PASSWORD,required"`
 
 	// Essential pool settings (prevent PostgreSQL exhaustion)
-	MaxOpenConns    int           `env:"DB_MAX_OPEN_CONNS,default=25"`
-	MaxIdleConns    int           `env:"DB_MAX_IDLE_CONNS,default=10"`
-	ConnMaxLifetime time.Duration `env:"DB_CONN_MAX_LIFETIME,default=4m"`
-	ConnMaxIdleTime time.Duration `env:"DB_CONN_MAX_IDLE_TIME,default=15m"`
+	MaxOpenConns    int           `env:"DB_MAX_OPEN_CONNS,overwrite,default=25"`
+	MaxIdleConns    int           `env:"DB_MAX_IDLE_CONNS,overwrite,default=10"`
+	ConnMaxLifetime time.Duration `env:"DB_CONN_MAX_LIFETIME,overwrite,default=4m"`
+	ConnMaxIdleTime time.Duration `env:"DB_CONN_MAX_IDLE_TIME,overwrite,default=15m"`
 
 	// Explicit settings
-	Timezone string `env:"DB_TIMEZONE,default=UTC"`
-	SSLMode  string `env:"POSTGRES_SSLMODE,default=disable"`
+	Timezone string `env:"DB_TIMEZONE,overwrite,default=UTC"`
+	SSLMode  string `env:"POSTGRES_SSLMODE,overwrite,default=disable"`
 }
 
 type LogConfig struct {
-	Level      string   `env:"LOG_LEVEL,default=info"`
-	Format     string   `env:"LOG_FORMAT,default=json"`
-	OutputPath []string `env:"LOG_OUTPUT,default=stdout"`
+	Level      string   `env:"LOG_LEVEL,overwrite,default=info"`
+	Format     string   `env:"LOG_FORMAT,overwrite,default=json"`
+	OutputPath []string `env:"LOG_OUTPUT,overwrite,default=stdout"`
 }
 
 type CORSConfig struct {
-	AllowOrigins     []string `env:"CORS_ALLOW_ORIGINS,default=*"`
-	AllowCredentials bool     `env:"CORS_ALLOW_CREDENTIALS,default=false"`
-	AllowHeaders     []string `env:"CORS_ALLOW_HEADERS,default=*"`
+	AllowOrigins     []string `env:"CORS_ALLOW_ORIGINS,overwrite,default=*"`
+	AllowCredentials bool     `env:"CORS_ALLOW_CREDENTIALS,overwrite,default=false"`
+	AllowHeaders     []string `env:"CORS_ALLOW_HEADERS,overwrite,default=*"`
 }
 
 type Config struct {
