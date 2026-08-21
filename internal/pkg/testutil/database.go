@@ -12,8 +12,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// NewDatabase opens the shared PostgreSQL test database.
-func NewDatabase(t *testing.T) *gorm.DB {
+// NewDatabaseClient opens the shared PostgreSQL test database client.
+func NewDatabaseClient(t *testing.T) *databasepkg.Database {
 	t.Helper()
 
 	require.Equal(t, "test", os.Getenv("GO_ENV"), "tests must run with GO_ENV=test")
@@ -28,7 +28,14 @@ func NewDatabase(t *testing.T) *gorm.DB {
 		require.NoError(t, database.Close())
 	})
 
-	return database.DB
+	return database
+}
+
+// NewDatabase opens the shared PostgreSQL test database.
+func NewDatabase(t *testing.T) *gorm.DB {
+	t.Helper()
+
+	return NewDatabaseClient(t).DB
 }
 
 // Begin starts a transaction that is rolled back when the test finishes.

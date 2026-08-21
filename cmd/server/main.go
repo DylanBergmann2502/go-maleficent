@@ -4,15 +4,14 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/DylanBergmann2502/go-maleficent/configs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/handlers"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
-	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/api/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
+	apphandlers "github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/openapi"
 	"github.com/go-playground/validator/v10"
@@ -95,21 +94,7 @@ func runAPIServer() {
 	humaAPI := openapi.New(e)
 	auth.RegisterRoutes(humaAPI, userHandler)
 
-	e.GET("/health", func(c *echo.Context) error {
-		logger := logging.GetLogger(c)
-		logger.Info("Health check endpoint hit",
-			zap.String("host", config.Server.Host),
-			zap.Int("port", config.Server.Port),
-			zap.String("log_level", config.Log.Level),
-			zap.String("log_format", config.Log.Format),
-		)
-
-		return c.JSON(http.StatusOK, apiresponses.Success(c, map[string]any{
-			"status":   "ok",
-			"message":  "Go Maleficent API is running",
-			"database": db.GetStats(),
-		}))
-	})
+	apphandlers.RegisterRoutes(e, db)
 
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 	logging.Info(logger, "Server listening", zap.String("address", address))
