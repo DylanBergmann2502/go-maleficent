@@ -11,6 +11,7 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	debug "github.com/DylanBergmann2502/go-maleficent/internal/pkg/debug"
 	apphandlers "github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/openapi"
 	"github.com/go-playground/validator/v10"
@@ -24,7 +25,7 @@ type Application struct {
 }
 
 // New builds the HTTP application and wires its dependencies.
-func New(config *configs.Config, logger *slog.Logger, db *database.Database) *Application {
+func New(config *configs.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client) *Application {
 	e := echo.New()
 	e.Logger = logger
 
@@ -39,7 +40,7 @@ func New(config *configs.Config, logger *slog.Logger, db *database.Database) *Ap
 	e.Use(logging.SlogLoggerMiddleware(logger))
 
 	validate := validator.New()
-	userService := services.NewUserService(db.DB, validate)
+	userService := services.NewUserService(db.DB, validate, jobClient)
 	userHandler := authhandlers.NewUserHandler(userService)
 
 	humaAPI := openapi.New(e)

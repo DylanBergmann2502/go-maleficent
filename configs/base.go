@@ -27,6 +27,17 @@ type DatabaseConfig struct {
 	SSLMode  string `env:"POSTGRES_SSLMODE,overwrite,default=disable"`
 }
 
+type RedisConfig struct {
+	Host     string `env:"REDIS_HOST,overwrite,default=redis"`
+	Port     int    `env:"REDIS_PORT,overwrite,default=6379"`
+	Password string `env:"REDIS_PASSWORD,overwrite,default="`
+	DB       int    `env:"REDIS_DB,overwrite,default=0"`
+}
+
+type BackgroundJobsConfig struct {
+	Concurrency int `env:"BACKGROUND_JOBS_CONCURRENCY,overwrite,default=10"`
+}
+
 type LogConfig struct {
 	Level      string   `env:"LOG_LEVEL,overwrite,default=info"`
 	Format     string   `env:"LOG_FORMAT,overwrite,default=json"`
@@ -46,6 +57,8 @@ type DebugConfig struct {
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
+	Redis    RedisConfig
+	Jobs     BackgroundJobsConfig
 	Log      LogConfig
 	CORS     CORSConfig
 	Debug    DebugConfig
@@ -64,6 +77,13 @@ func GetBaseConfig() *Config {
 			ConnMaxIdleTime: 15 * time.Minute,
 			Timezone:        "UTC",
 			SSLMode:         "disable",
+		},
+		Redis: RedisConfig{
+			Host: "redis",
+			Port: 6379,
+		},
+		Jobs: BackgroundJobsConfig{
+			Concurrency: 10,
 		},
 		Log: LogConfig{
 			Level:      "info",

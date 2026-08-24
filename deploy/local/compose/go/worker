@@ -1,0 +1,8 @@
+#!/bin/bash
+# deploy/local/compose/go/worker
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+exec go run cmd/server/main.go worker

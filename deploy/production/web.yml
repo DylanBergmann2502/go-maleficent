@@ -4,6 +4,7 @@ name: go_maleficent_production
 volumes:
   postgres_data: {}
   postgres_data_backups: {}
+  redis_data: {}
 
 services:
   go:
@@ -14,12 +15,47 @@ services:
     container_name: go
     restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     env_file:
       - ./.envs/.go
     ports:
       - "8000:8000"
     command: /start
+
+  go_worker:
+    build:
+      context: ../..
+      dockerfile: ./deploy/production/compose/go/Dockerfile
+    image: go
+    container_name: go_worker
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - ./.envs/.go
+    command: /worker
+
+  go_cron:
+    build:
+      context: ../..
+      dockerfile: ./deploy/production/compose/go/Dockerfile
+    image: go
+    container_name: go_cron
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - ./.envs/.go
+    command: /cron
 
   postgres:
     build:
@@ -33,3 +69,20 @@ services:
       - postgres_data_backups:/backups
     env_file:
       - ./.envs/.postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

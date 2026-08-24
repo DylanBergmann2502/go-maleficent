@@ -18,7 +18,7 @@ import (
 func TestUserServiceCreateUserPersistsNormalizedUser(t *testing.T) {
 	db := testutil.NewDatabase(t)
 	tx := testutil.Begin(t, db)
-	service := NewUserService(tx, validator.New())
+	service := NewUserService(tx, validator.New(), nil)
 
 	user, err := service.CreateUser("  USER@Example.COM  ", "correct horse battery staple")
 
@@ -40,7 +40,7 @@ func TestUserServiceCreateUserPersistsNormalizedUser(t *testing.T) {
 func TestUserServiceCreateUserRejectsInvalidForm(t *testing.T) {
 	db := testutil.NewDatabase(t)
 	tx := testutil.Begin(t, db)
-	service := NewUserService(tx, validator.New())
+	service := NewUserService(tx, validator.New(), nil)
 
 	user, err := service.CreateUser("invalid-email", "short")
 
@@ -54,7 +54,7 @@ func TestUserServiceCreateUserRejectsInvalidForm(t *testing.T) {
 func TestUserServiceCreateUserRejectsRegisteredEmail(t *testing.T) {
 	db := testutil.NewDatabase(t)
 	tx := testutil.Begin(t, db)
-	service := NewUserService(tx, validator.New())
+	service := NewUserService(tx, validator.New(), nil)
 
 	require.NoError(t, tx.Create(&models.User{
 		Email:        "registered@example.com",

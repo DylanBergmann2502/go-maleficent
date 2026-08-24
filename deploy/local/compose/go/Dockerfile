@@ -59,13 +59,17 @@ COPY ./deploy/local/compose/go/entrypoint /entrypoint
 COPY ./deploy/local/compose/go/start /start
 COPY ./deploy/local/compose/go/migrate /migrate
 COPY ./deploy/local/compose/go/test /test
+COPY ./deploy/local/compose/go/worker /worker
+COPY ./deploy/local/compose/go/cron /cron
 
 # Remove Windows line endings and make scripts executable
 RUN sed -i 's/\r$//g' /entrypoint \
     && sed -i 's/\r$//g' /start \
     && sed -i 's/\r$//g' /migrate \
     && sed -i 's/\r$//g' /test \
-    && chmod +x /entrypoint /start /migrate /test
+    && sed -i 's/\r$//g' /worker \
+    && sed -i 's/\r$//g' /cron \
+    && chmod +x /entrypoint /start /migrate /test /worker /cron
 
 EXPOSE 8000
 

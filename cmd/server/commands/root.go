@@ -12,6 +12,8 @@ func NewRootCommand() *cobra.Command {
 	}
 
 	root.AddCommand(NewAPICommand())
+	root.AddCommand(NewWorkerCommand())
+	root.AddCommand(NewCronCommand())
 	root.AddCommand(NewMigrateCommand())
 
 	return root

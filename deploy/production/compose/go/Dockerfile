@@ -48,11 +48,15 @@ RUN chmod +x ./bin/server
 # Copy production scripts
 COPY ./deploy/production/compose/go/entrypoint /entrypoint
 COPY ./deploy/production/compose/go/start /start
+COPY ./deploy/production/compose/go/worker /worker
+COPY ./deploy/production/compose/go/cron /cron
 
 # Remove Windows line endings and make scripts executable
 RUN sed -i 's/\r$//g' /entrypoint \
     && sed -i 's/\r$//g' /start \
-    && chmod +x /entrypoint /start \
+    && sed -i 's/\r$//g' /worker \
+    && sed -i 's/\r$//g' /cron \
+    && chmod +x /entrypoint /start /worker /cron \
     && chown -R app:app /app
 
 # Switch to non-root user

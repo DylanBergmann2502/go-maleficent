@@ -1,6 +1,13 @@
 # deploy/production/.envs/.go
 GO_ENV=production
 PPROF_ENDPOINTS_ENABLED=false
+BACKGROUND_JOBS_CONCURRENCY=10
+
+# Redis Configuration
+# ------------------------------------------------------------------------------
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_DB=0
 
 # Database Configuration
 # ------------------------------------------------------------------------------

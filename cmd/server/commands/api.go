@@ -8,6 +8,7 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/configs"
 	application "github.com/DylanBergmann2502/go-maleficent/internal/app"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
 	"github.com/spf13/cobra"
 )
@@ -45,7 +46,17 @@ func runAPIServer() error {
 		}
 	}()
 
-	application := application.New(config, logger, db)
+	jobClient, err := jobs.NewClient(config)
+	if err != nil {
+		return fmt.Errorf("failed to initialize background job client: %w", err)
+	}
+	defer func() {
+		if closeErr := jobClient.Close(); closeErr != nil {
+			logger.Error("Failed to close background job client", slog.Any("error", closeErr))
+		}
+	}()
+
+	application := application.New(config, logger, db, jobClient)
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 	logging.Info(logger, "Server listening", slog.String("address", address))
 

@@ -49,7 +49,7 @@ func newAuthAPI(t *testing.T) (*echo.Echo, *gorm.DB) {
 
 	db := testutil.NewDatabase(t)
 	tx := testutil.Begin(t, db)
-	service := services.NewUserService(tx, validator.New())
+	service := services.NewUserService(tx, validator.New(), nil)
 	handler := handlers.NewUserHandler(service)
 
 	e := echo.New()
