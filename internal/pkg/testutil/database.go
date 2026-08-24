@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	databasepkg "github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
@@ -19,7 +19,7 @@ func NewDatabaseClient(t *testing.T) *databasepkg.Database {
 
 	require.Equal(t, "test", os.Getenv("GO_ENV"), "tests must run with GO_ENV=test")
 
-	config, err := configs.LoadConfig()
+	config, err := config.LoadConfig()
 	require.NoError(t, err)
 
 	database, err := databasepkg.NewDatabase(&config.Database, slog.New(slog.NewTextHandler(io.Discard, nil)))

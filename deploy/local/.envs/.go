@@ -1,5 +1,7 @@
 # deploy/local/.envs/.go
 GO_ENV=local
+LOG_LEVEL=debug
+LOG_FORMAT=console
 PPROF_ENDPOINTS_ENABLED=true
 BACKGROUND_JOBS_CONCURRENCY=10
 

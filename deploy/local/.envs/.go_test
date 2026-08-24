@@ -1,4 +1,6 @@
 # deploy/local/.envs/.go_test
 GO_ENV=test
+LOG_LEVEL=info
+LOG_FORMAT=json
 PPROF_ENDPOINTS_ENABLED=false
 DB_ADMIN_NAME=postgres

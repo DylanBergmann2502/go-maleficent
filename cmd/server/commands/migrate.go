@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
 	"github.com/spf13/cobra"
@@ -51,7 +51,7 @@ func newMigrateDownCommand() *cobra.Command {
 }
 
 func runMigrateUp(args []string) (err error) {
-	config, err := configs.LoadConfig()
+	config, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
@@ -82,7 +82,7 @@ func runMigrateUp(args []string) (err error) {
 }
 
 func runMigrateDown(args []string) (err error) {
-	config, err := configs.LoadConfig()
+	config, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}

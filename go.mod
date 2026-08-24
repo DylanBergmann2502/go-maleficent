@@ -4,6 +4,7 @@ module github.com/DylanBergmann2502/go-maleficent
 go 1.27.0
 
 require (
+	github.com/caarlos0/env/v11 v11.4.1
 	github.com/danielgtaylor/huma/v2 v2.39.1
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/golang-migrate/migrate/v4 v4.19.1
@@ -12,7 +13,6 @@ require (
 	github.com/labstack/echo-contrib/v5 v5.0.1
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/lmittmann/tint v1.2.0
-	github.com/sethvargo/go-envconfig v1.4.3
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/crypto v0.55.0

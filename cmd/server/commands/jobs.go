@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
 	"github.com/spf13/cobra"
@@ -31,8 +31,8 @@ func NewCronCommand() *cobra.Command {
 	}
 }
 
-func loadJobsDependencies() (*configs.Config, *slog.Logger, error) {
-	config, err := configs.LoadConfig()
+func loadJobsDependencies() (*config.Config, *slog.Logger, error) {
+	config, err := config.LoadConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to load config: %w", err)
 	}

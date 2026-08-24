@@ -1,5 +1,5 @@
-// configs/config_test.go
-package configs
+// config/config_test.go
+package config
 
 import (
 	"os"
@@ -57,9 +57,11 @@ func TestLoadConfigDoesNotDuplicateTestDatabaseSuffix(t *testing.T) {
 	assert.Equal(t, "go_maleficent_test", config.Database.Database)
 }
 
-func TestLoadConfigUsesLocalOverrides(t *testing.T) {
+func TestLoadConfigUsesEnvironmentForLocalOverrides(t *testing.T) {
 	setRequiredDatabaseEnvironment(t)
 	t.Setenv("GO_ENV", "local")
+	t.Setenv("LOG_LEVEL", "debug")
+	t.Setenv("LOG_FORMAT", "console")
 	t.Setenv("PPROF_ENDPOINTS_ENABLED", "true")
 
 	config, err := LoadConfig()
@@ -73,7 +75,6 @@ func TestLoadConfigUsesLocalOverrides(t *testing.T) {
 func TestLoadConfigParsesEnvironmentOverrides(t *testing.T) {
 	setRequiredDatabaseEnvironment(t)
 	t.Setenv("GO_ENV", "production")
-	t.Setenv("PPROF_ENDPOINTS_ENABLED", "false")
 	t.Setenv("DB_PORT", "6432")
 	t.Setenv("DB_MAX_OPEN_CONNS", "40")
 	t.Setenv("DB_CONN_MAX_LIFETIME", "2m")

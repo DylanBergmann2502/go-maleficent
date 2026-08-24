@@ -4,7 +4,7 @@ package app
 import (
 	"log/slog"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth"
 	authhandlers "github.com/DylanBergmann2502/go-maleficent/internal/app/auth/handlers"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
@@ -25,7 +25,7 @@ type Application struct {
 }
 
 // New builds the HTTP application and wires its dependencies.
-func New(config *configs.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client) *Application {
+func New(config *config.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client) *Application {
 	e := echo.New()
 	e.Logger = logger
 

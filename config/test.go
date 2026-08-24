@@ -1,13 +1,7 @@
-// configs/test.go
-package configs
+// config/test.go
+package config
 
 import "strings"
-
-func GetTestConfig() *Config {
-	config := GetBaseConfig()
-
-	return config
-}
 
 func applyTestDatabaseName(config *Config) {
 	if !strings.HasSuffix(config.Database.Database, "_test") {

@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type Database struct {
 	*gorm.DB
-	config *configs.DatabaseConfig
+	config *config.DatabaseConfig
 	logger *slog.Logger
 }
 
-func NewDatabase(config *configs.DatabaseConfig, logger *slog.Logger) (*Database, error) {
+func NewDatabase(config *config.DatabaseConfig, logger *slog.Logger) (*Database, error) {
 	dsn := buildDSN(config)
 
 	gormConfig := &gorm.Config{TranslateError: true}
@@ -87,7 +87,7 @@ func (d *Database) GetStats() map[string]any {
 	}
 }
 
-func buildDSN(config *configs.DatabaseConfig) string {
+func buildDSN(config *config.DatabaseConfig) string {
 	return fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s TimeZone=%s",
 		config.Host,

@@ -8,12 +8,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	"github.com/lmittmann/tint"
 )
 
 // NewLogger creates a structured application logger.
-func NewLogger(logConfig *configs.LogConfig) (*slog.Logger, error) {
+func NewLogger(logConfig *config.LogConfig) (*slog.Logger, error) {
 	options := &slog.HandlerOptions{Level: getLogLevel(logConfig.Level)}
 	writer, err := outputWriter(logConfig.OutputPath)
 	if err != nil {
@@ -24,7 +24,7 @@ func NewLogger(logConfig *configs.LogConfig) (*slog.Logger, error) {
 }
 
 // NewLoggerWithCaller creates a logger that includes source locations.
-func NewLoggerWithCaller(logConfig *configs.LogConfig) (*slog.Logger, error) {
+func NewLoggerWithCaller(logConfig *config.LogConfig) (*slog.Logger, error) {
 	options := &slog.HandlerOptions{
 		Level:     getLogLevel(logConfig.Level),
 		AddSource: true,

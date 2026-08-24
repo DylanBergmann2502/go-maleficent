@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	application "github.com/DylanBergmann2502/go-maleficent/internal/app"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
@@ -26,7 +26,7 @@ func NewAPICommand() *cobra.Command {
 }
 
 func runAPIServer() error {
-	config, err := configs.LoadConfig()
+	config, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}

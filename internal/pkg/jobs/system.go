@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	"github.com/hibiken/asynq"
 )
 
-func redisOptions(config *configs.Config) asynq.RedisClientOpt {
+func redisOptions(config *config.Config) asynq.RedisClientOpt {
 	return asynq.RedisClientOpt{
 		Addr:     fmt.Sprintf("%s:%d", config.Redis.Host, config.Redis.Port),
 		Password: config.Redis.Password,
@@ -23,7 +23,7 @@ type Worker struct {
 	mux    *asynq.ServeMux
 }
 
-func NewWorker(config *configs.Config, logger *slog.Logger) (*Worker, error) {
+func NewWorker(config *config.Config, logger *slog.Logger) (*Worker, error) {
 	redis := redisOptions(config)
 	client, err := NewClient(config)
 	if err != nil {
@@ -62,7 +62,7 @@ type Client struct {
 	client *asynq.Client
 }
 
-func NewClient(config *configs.Config) (*Client, error) {
+func NewClient(config *config.Config) (*Client, error) {
 	client := asynq.NewClient(redisOptions(config))
 	if err := client.Ping(); err != nil {
 		_ = client.Close()
@@ -80,7 +80,7 @@ func (c *Client) Close() error {
 	return c.client.Close()
 }
 
-func NewScheduler(config *configs.Config, logger *slog.Logger) (*Scheduler, error) {
+func NewScheduler(config *config.Config, logger *slog.Logger) (*Scheduler, error) {
 	redis := redisOptions(config)
 	client, err := NewClient(config)
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/DylanBergmann2502/go-maleficent/config"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
@@ -19,7 +19,7 @@ type Migrator struct {
 }
 
 // NewMigrator creates a new migrator instance with embedded migrations
-func NewMigrator(config *configs.DatabaseConfig) (*Migrator, error) {
+func NewMigrator(config *config.DatabaseConfig) (*Migrator, error) {
 	// Create iofs source from embedded files
 	sourceDriver, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
@@ -73,7 +73,7 @@ func (m *Migrator) Close() error {
 
 // buildMigrationDSN builds a postgres connection string for migrations
 // This format is required by golang-migrate (different from GORM format)
-func buildMigrationDSN(config *configs.DatabaseConfig) string {
+func buildMigrationDSN(config *config.DatabaseConfig) string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
 		config.User,

@@ -1,5 +1,7 @@
 # deploy/production/.envs/.go
 GO_ENV=production
+LOG_LEVEL=info
+LOG_FORMAT=json
 PPROF_ENDPOINTS_ENABLED=false
 BACKGROUND_JOBS_CONCURRENCY=10
 
