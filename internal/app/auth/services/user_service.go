@@ -12,6 +12,7 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs/tasks"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -83,4 +84,86 @@ func (s *UserService) CreateUser(email, password string) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+// ListUsers returns all users without exposing password hashes.
+func (s *UserService) ListUsers() ([]models.User, error) {
+	var users []models.User
+	if err := s.db.Order("created_at ASC").Find(&users).Error; err != nil {
+		return nil, apperrors.WrapApplicationError(err, apperrors.ErrUnavailableCategory, "database_unavailable", "failed to list users", nil)
+	}
+
+	return users, nil
+}
+
+// GetUser returns a user by resource ID.
+func (s *UserService) GetUser(id uuid.UUID) (*models.User, error) {
+	var user models.User
+	if err := s.db.First(&user, "id = ?", id).Error; err != nil {
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, userNotFoundError()
+		}
+
+		return nil, apperrors.WrapApplicationError(err, apperrors.ErrUnavailableCategory, "database_unavailable", "failed to get user", nil)
+	}
+
+	return &user, nil
+}
+
+// UpdateUser applies a partial update to a user.
+func (s *UserService) UpdateUser(id uuid.UUID, email, password *string) (*models.User, error) {
+	form := forms.NewUpdateUserForm(email, password)
+	if err := form.Validate(s.validator); err != nil {
+		return nil, err
+	}
+
+	user, err := s.GetUser(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if form.Email != nil && *form.Email != user.Email {
+		if err := checks.EnsureEmailAvailableExcept(s.db, *form.Email, id); err != nil {
+			return nil, err
+		}
+		user.Email = *form.Email
+	}
+
+	if form.Password != nil {
+		hashedPassword, err := utils.HashPassword(*form.Password)
+		if err != nil {
+			return nil, apperrors.WrapApplicationError(err, apperrors.ErrInternalCategory, "password_hash_failed", "failed to hash password", nil)
+		}
+		user.PasswordHash = hashedPassword
+	}
+
+	if err := s.db.Save(user).Error; err != nil {
+		if stderrors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, checks.ErrEmailAlreadyRegistered
+		}
+		var appErr *apperrors.ApplicationError
+		if stderrors.As(err, &appErr) {
+			return nil, err
+		}
+		return nil, apperrors.WrapApplicationError(err, apperrors.ErrInternalCategory, "database_error", "failed to update user", nil)
+	}
+
+	return user, nil
+}
+
+// DeleteUser removes a user by resource ID.
+func (s *UserService) DeleteUser(id uuid.UUID) error {
+	result := s.db.Delete(&models.User{}, "id = ?", id)
+	if result.Error != nil {
+		return apperrors.WrapApplicationError(result.Error, apperrors.ErrInternalCategory, "database_error", "failed to delete user", nil)
+	}
+	if result.RowsAffected == 0 {
+		return userNotFoundError()
+	}
+
+	return nil
+}
+
+func userNotFoundError() error {
+	return apperrors.NewApplicationError(apperrors.ErrNotFoundCategory, "user_not_found", "user not found", nil)
 }
