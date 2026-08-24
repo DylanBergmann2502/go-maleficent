@@ -11,6 +11,7 @@ require (
 	github.com/hibiken/asynq v0.26.0
 	github.com/labstack/echo-contrib/v5 v5.0.1
 	github.com/labstack/echo/v5 v5.3.1
+	github.com/lmittmann/tint v1.2.0
 	github.com/sethvargo/go-envconfig v1.4.3
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1

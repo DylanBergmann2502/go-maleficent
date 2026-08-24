@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/DylanBergmann2502/go-maleficent/configs"
+	"github.com/lmittmann/tint"
 )
 
 // NewLogger creates a structured application logger.
@@ -19,10 +20,7 @@ func NewLogger(logConfig *configs.LogConfig) (*slog.Logger, error) {
 		return nil, err
 	}
 
-	if logConfig.Format == "console" {
-		return slog.New(slog.NewTextHandler(writer, options)), nil
-	}
-	return slog.New(slog.NewJSONHandler(writer, options)), nil
+	return slog.New(newHandler(writer, options, logConfig.Format)), nil
 }
 
 // NewLoggerWithCaller creates a logger that includes source locations.
@@ -36,12 +34,22 @@ func NewLoggerWithCaller(logConfig *configs.LogConfig) (*slog.Logger, error) {
 		return nil, err
 	}
 
-	if logConfig.Format == "console" {
-		return slog.New(slog.NewTextHandler(writer, options)), nil
-	}
-	return slog.New(slog.NewJSONHandler(writer, options)), nil
+	return slog.New(newHandler(writer, options, logConfig.Format)), nil
 }
 
+func newHandler(writer io.Writer, options *slog.HandlerOptions, format string) slog.Handler {
+	if format == "console" {
+		handler := tint.NewTextHandler(writer, &tint.Options{
+			Level:       options.Level,
+			AddSource:   options.AddSource,
+			NoColor:     false,
+			ReplaceAttr: options.ReplaceAttr,
+		})
+		return handler
+	}
+
+	return slog.NewJSONHandler(writer, options)
+}
 func getLogLevel(level string) slog.Level {
 	switch strings.ToLower(level) {
 	case "debug":
