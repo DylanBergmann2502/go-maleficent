@@ -34,4 +34,6 @@ func TestFromModelMapsPublicUserFields(t *testing.T) {
 	encoded, err := json.Marshal(output)
 	require.NoError(t, err)
 	assert.NotContains(t, string(encoded), "password")
+	assert.Contains(t, string(encoded), `"created_at":"2026-08-21T10:00:00Z"`)
+	assert.Contains(t, string(encoded), `"updated_at":"2026-08-21T11:00:00Z"`)
 }

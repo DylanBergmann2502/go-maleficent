@@ -4,6 +4,7 @@ package queries
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/query"
@@ -30,16 +31,16 @@ func (params UserListQuery) Apply(db *gorm.DB) *gorm.DB {
 	if len(params.EmailIn) > 0 {
 		db = db.Where("email IN ?", params.EmailIn)
 	}
-	if params.CreatedAtGTE != "" {
+	if !params.CreatedAtGTE.IsZero() {
 		db = db.Where("created_at >= ?", params.CreatedAtGTE)
 	}
-	if params.CreatedAtLTE != "" {
+	if !params.CreatedAtLTE.IsZero() {
 		db = db.Where("created_at <= ?", params.CreatedAtLTE)
 	}
-	if params.UpdatedAtGTE != "" {
+	if !params.UpdatedAtGTE.IsZero() {
 		db = db.Where("updated_at >= ?", params.UpdatedAtGTE)
 	}
-	if params.UpdatedAtLTE != "" {
+	if !params.UpdatedAtLTE.IsZero() {
 		db = db.Where("updated_at <= ?", params.UpdatedAtLTE)
 	}
 
@@ -77,15 +78,15 @@ type UserListQuery struct {
 	Sort         []query.SortField
 	Email        string
 	EmailIn      []string
-	CreatedAtGTE string
-	CreatedAtLTE string
-	UpdatedAtGTE string
-	UpdatedAtLTE string
+	CreatedAtGTE time.Time
+	CreatedAtLTE time.Time
+	UpdatedAtGTE time.Time
+	UpdatedAtLTE time.Time
 }
 
 // NewUserListQuery translates the canonical list query input into an
 // application query and rejects unsupported sort fields.
-func NewUserListQuery(page, pageSize int, sortValue, email, emailIn, createdAtGTE, createdAtLTE, updatedAtGTE, updatedAtLTE string) (UserListQuery, error) {
+func NewUserListQuery(page, pageSize int, sortValue, email, emailIn string, createdAtGTE, createdAtLTE, updatedAtGTE, updatedAtLTE time.Time) (UserListQuery, error) {
 	if page == 0 {
 		page = query.DefaultPage
 	}

@@ -15,16 +15,18 @@ import (
 )
 
 func TestNewUserListQueryTranslatesCanonicalParameters(t *testing.T) {
+	createdAtGTE := time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC)
+	updatedAtLTE := time.Date(2026, time.February, 15, 0, 0, 0, 0, time.UTC)
 	params, err := NewUserListQuery(
 		2,
 		50,
 		"-created_at,email",
 		" *@example.com ",
 		"one@example.com,two@example.com",
-		"2026-01-01T00:00:00Z",
-		"2026-02-01T00:00:00Z",
-		"2026-01-15T00:00:00Z",
-		"2026-02-15T00:00:00Z",
+		createdAtGTE,
+		time.Date(2026, time.February, 1, 0, 0, 0, 0, time.UTC),
+		time.Date(2026, time.January, 15, 0, 0, 0, 0, time.UTC),
+		updatedAtLTE,
 	)
 
 	require.NoError(t, err)
@@ -35,12 +37,12 @@ func TestNewUserListQueryTranslatesCanonicalParameters(t *testing.T) {
 	assert.Len(t, params.Sort, 2)
 	assert.False(t, params.Sort[0].Ascending)
 	assert.True(t, params.Sort[1].Ascending)
-	assert.Equal(t, "2026-01-01T00:00:00Z", params.CreatedAtGTE)
-	assert.Equal(t, "2026-02-15T00:00:00Z", params.UpdatedAtLTE)
+	assert.Equal(t, createdAtGTE, params.CreatedAtGTE)
+	assert.Equal(t, updatedAtLTE, params.UpdatedAtLTE)
 }
 
 func TestNewUserListQueryRejectsUnsupportedSort(t *testing.T) {
-	_, err := NewUserListQuery(1, 20, "-password_hash", "", "", "", "", "", "")
+	_, err := NewUserListQuery(1, 20, "-password_hash", "", "", time.Time{}, time.Time{}, time.Time{}, time.Time{})
 
 	var appErr *apperrors.ApplicationError
 	require.ErrorAs(t, err, &appErr)
@@ -61,7 +63,7 @@ func TestUserListQueryAppliesFiltersSortsAndPaginates(t *testing.T) {
 		require.NoError(t, tx.Create(&users[index]).Error)
 	}
 
-	params, err := NewUserListQuery(1, 1, "-email", "*@example.com", "", "", "", "", "")
+	params, err := NewUserListQuery(1, 1, "-email", "*@example.com", "", time.Time{}, time.Time{}, time.Time{}, time.Time{})
 	require.NoError(t, err)
 
 	var result []models.User
@@ -88,10 +90,10 @@ func TestUserListQuerySupportsINAndDateFilters(t *testing.T) {
 		"email",
 		"",
 		"beta@example.com",
-		createdAt.Format(time.RFC3339),
-		createdAt.Add(2*time.Hour).Format(time.RFC3339),
-		"",
-		"",
+		createdAt,
+		createdAt.Add(2*time.Hour),
+		time.Time{},
+		time.Time{},
 	)
 	require.NoError(t, err)
 
