@@ -24,8 +24,8 @@ type DatabaseConfig struct {
 }
 
 type RedisConfig struct {
-	Host     string `env:"REDIS_HOST" envDefault:"redis"`
-	Port     int    `env:"REDIS_PORT" envDefault:"6379"`
+	Host     string `env:"REDIS_HOST,required"`
+	Port     int    `env:"REDIS_PORT,required"`
 	Password string `env:"REDIS_PASSWORD" envDefault:""`
 	DB       int    `env:"REDIS_DB" envDefault:"0"`
 }

@@ -13,6 +13,8 @@ import (
 func setRequiredDatabaseEnvironment(t *testing.T) {
 	t.Helper()
 
+	t.Setenv("REDIS_HOST", "redis")
+	t.Setenv("REDIS_PORT", "6379")
 	t.Setenv("DB_HOST", "postgres")
 	t.Setenv("DB_PORT", "5432")
 	t.Setenv("DB_NAME", "go_maleficent")
@@ -63,6 +65,7 @@ func TestLoadConfigUsesEnvironmentForLocalOverrides(t *testing.T) {
 	t.Setenv("LOG_LEVEL", "debug")
 	t.Setenv("LOG_FORMAT", "console")
 	t.Setenv("PPROF_ENDPOINTS_ENABLED", "true")
+	t.Setenv("DB_TIMEZONE", "UTC")
 
 	config, err := LoadConfig()
 
@@ -70,6 +73,27 @@ func TestLoadConfigUsesEnvironmentForLocalOverrides(t *testing.T) {
 	assert.Equal(t, "debug", config.Log.Level)
 	assert.Equal(t, "console", config.Log.Format)
 	assert.True(t, config.Debug.PprofEndpointsEnabled)
+	assert.Equal(t, "UTC", config.Database.Timezone)
+}
+
+func TestLoadConfigDefaultsDatabaseTimezoneToUTC(t *testing.T) {
+	setRequiredDatabaseEnvironment(t)
+	unsetEnvironment(t, "DB_TIMEZONE")
+
+	config, err := LoadConfig()
+
+	require.NoError(t, err)
+	assert.Equal(t, "UTC", config.Database.Timezone)
+}
+
+func TestLoadConfigRejectsInvalidDatabaseTimezone(t *testing.T) {
+	setRequiredDatabaseEnvironment(t)
+	t.Setenv("DB_TIMEZONE", "Not/A/Timezone")
+
+	_, err := LoadConfig()
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `invalid DB_TIMEZONE "Not/A/Timezone"`)
 }
 
 func TestLoadConfigParsesEnvironmentOverrides(t *testing.T) {
