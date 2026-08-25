@@ -6,6 +6,7 @@ import (
 
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/inputs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/outputs"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/queries"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
 	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/api/responses"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
@@ -35,8 +36,23 @@ func (h *UserHandler) Create(ctx context.Context, input *inputs.CreateUserInput)
 	return output, nil
 }
 
-func (h *UserHandler) List(ctx context.Context, _ *inputs.ListUsersInput) (*outputs.ListUsersOutput, error) {
-	users, err := h.service.ListUsers()
+func (h *UserHandler) List(ctx context.Context, input *inputs.ListUsersInput) (*outputs.ListUsersOutput, error) {
+	params, err := queries.NewUserListQuery(
+		input.Page,
+		input.PageSize,
+		input.Sort,
+		input.Email,
+		input.EmailIn,
+		input.CreatedAtGTE,
+		input.CreatedAtLTE,
+		input.UpdatedAtGTE,
+		input.UpdatedAtLTE,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	users, pagination, err := h.service.ListUsers(params)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +65,16 @@ func (h *UserHandler) List(ctx context.Context, _ *inputs.ListUsersInput) (*outp
 	output := &outputs.ListUsersOutput{}
 	output.Body.Data = data
 	output.Body.Meta = apiresponses.NewMetaDataFromContext(ctx)
+	output.Body.Meta.Pagination = &apiresponses.PaginationData{
+		Page:       pagination.Page,
+		PageSize:   pagination.PageSize,
+		TotalCount: pagination.TotalCount,
+		TotalPages: pagination.TotalPages,
+		HasNext:    pagination.HasNext,
+		HasPrev:    pagination.HasPrev,
+		NextPage:   pagination.NextPage,
+		PrevPage:   pagination.PrevPage,
+	}
 	return output, nil
 }
 

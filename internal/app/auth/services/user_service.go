@@ -7,10 +7,12 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/checks"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/forms"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/models"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/queries"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/utils"
 	apperrors "github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs/tasks"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/query"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -87,13 +89,18 @@ func (s *UserService) CreateUser(email, password string) (*models.User, error) {
 }
 
 // ListUsers returns all users without exposing password hashes.
-func (s *UserService) ListUsers() ([]models.User, error) {
-	var users []models.User
-	if err := s.db.Order("created_at ASC").Find(&users).Error; err != nil {
-		return nil, apperrors.WrapApplicationError(err, apperrors.ErrUnavailableCategory, "database_unavailable", "failed to list users", nil)
+func (s *UserService) ListUsers(params queries.UserListQuery) ([]models.User, query.Pagination, error) {
+	var totalCount int64
+	if err := params.Apply(s.db.Model(&models.User{}).Session(&gorm.Session{})).Offset(-1).Limit(-1).Count(&totalCount).Error; err != nil {
+		return nil, query.Pagination{}, apperrors.WrapApplicationError(err, apperrors.ErrUnavailableCategory, "database_unavailable", "failed to count users", nil)
 	}
 
-	return users, nil
+	var users []models.User
+	if err := params.Apply(s.db.Model(&models.User{})).Find(&users).Error; err != nil {
+		return nil, query.Pagination{}, apperrors.WrapApplicationError(err, apperrors.ErrUnavailableCategory, "database_unavailable", "failed to list users", nil)
+	}
+
+	return users, query.NewPagination(params.Page, params.PageSize, totalCount), nil
 }
 
 // GetUser returns a user by resource ID.

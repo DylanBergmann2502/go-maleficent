@@ -7,8 +7,10 @@ import (
 
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/checks"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/models"
+	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/queries"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/utils"
 	apperrors "github.com/DylanBergmann2502/go-maleficent/internal/pkg/errors"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/query"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/testutil"
 	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
@@ -76,9 +78,13 @@ func TestUserServiceCRUDUser(t *testing.T) {
 	created, err := service.CreateUser("crud@example.com", "correct horse battery staple")
 	require.NoError(t, err)
 
-	users, err := service.ListUsers()
+	users, pagination, err := service.ListUsers(queries.UserListQuery{
+		Page:     query.DefaultPage,
+		PageSize: query.DefaultPageSize,
+	})
 	require.NoError(t, err)
 	require.Len(t, users, 1)
+	assert.Equal(t, int64(1), pagination.TotalCount)
 	assert.Equal(t, created.ID, users[0].ID)
 
 	fresh, err := service.GetUser(created.ID)

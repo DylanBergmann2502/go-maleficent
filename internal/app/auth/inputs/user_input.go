@@ -12,8 +12,18 @@ type CreateUserInput struct {
 	} `json:"body"`
 }
 
-// ListUsersInput contains filters for listing users.
-type ListUsersInput struct{}
+// ListUsersInput contains the list endpoint's transport parameters.
+type ListUsersInput struct {
+	Page         int    `query:"page" minimum:"1" default:"1" doc:"Page number (1-indexed)"`
+	PageSize     int    `query:"page_size" minimum:"1" maximum:"100" default:"20" doc:"Items per page"`
+	Sort         string `query:"sort" pattern:"^-?[A-Za-z][A-Za-z0-9_]*(,-?[A-Za-z][A-Za-z0-9_]*)*$" doc:"Comma-separated sort fields; prefix a field with - for descending order" example:"-created_at,email"`
+	Email        string `query:"email" doc:"Filter by exact email or wildcard pattern" example:"*@example.com"`
+	EmailIn      string `query:"email__in" doc:"Filter by comma-separated exact email values" example:"one@example.com,two@example.com"`
+	CreatedAtGTE string `query:"created_at__gte" format:"date-time" doc:"Filter users created at or after this timestamp"`
+	CreatedAtLTE string `query:"created_at__lte" format:"date-time" doc:"Filter users created at or before this timestamp"`
+	UpdatedAtGTE string `query:"updated_at__gte" format:"date-time" doc:"Filter users updated at or after this timestamp"`
+	UpdatedAtLTE string `query:"updated_at__lte" format:"date-time" doc:"Filter users updated at or before this timestamp"`
+}
 
 // GetUserInput identifies a user resource.
 type GetUserInput struct {

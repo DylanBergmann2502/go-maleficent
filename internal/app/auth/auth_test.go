@@ -30,6 +30,24 @@ type userResponse struct {
 	Meta responseMeta `json:"meta"`
 }
 
+type listUserResponse struct {
+	Data []struct {
+		ID    string `json:"id"`
+		Email string `json:"email"`
+	} `json:"data"`
+	Meta struct {
+		responseMeta
+		Pagination struct {
+			Page       int   `json:"page"`
+			PageSize   int   `json:"page_size"`
+			TotalCount int64 `json:"total_count"`
+			TotalPages int   `json:"total_pages"`
+			HasNext    bool  `json:"has_next"`
+			HasPrev    bool  `json:"has_prev"`
+		} `json:"pagination"`
+	} `json:"meta"`
+}
+
 type errorResponse struct {
 	Error struct {
 		Code    string         `json:"code"`
@@ -116,4 +134,61 @@ func TestCreateUserEndpointReturnsConflictForRegisteredEmail(t *testing.T) {
 	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
 	assert.Equal(t, "conflict", response.Error.Code)
 	assert.Equal(t, "user with this email already exists", response.Error.Message)
+}
+
+func TestListUsersEndpointUsesCanonicalQueryFormat(t *testing.T) {
+	e, db := newAuthAPI(t)
+	for _, email := range []string{"alpha@example.com", "beta@example.com", "gamma@other.com"} {
+		require.NoError(t, db.Exec(
+			"INSERT INTO users (id, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())",
+			uuid.New(), email, "argon2-hash",
+		).Error)
+	}
+
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/users?page=1&page_size=2&sort=-email&email=*example.com", nil)
+	request.Header.Set(echo.HeaderXRequestID, "request-list-123")
+	recorder := httptest.NewRecorder()
+
+	e.ServeHTTP(recorder, request)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	var response listUserResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	require.Len(t, response.Data, 2)
+	assert.Equal(t, "beta@example.com", response.Data[0].Email)
+	assert.Equal(t, "alpha@example.com", response.Data[1].Email)
+	assert.Equal(t, 1, response.Meta.Pagination.Page)
+	assert.Equal(t, 2, response.Meta.Pagination.PageSize)
+	assert.Equal(t, int64(2), response.Meta.Pagination.TotalCount)
+	assert.Equal(t, 1, response.Meta.Pagination.TotalPages)
+	assert.False(t, response.Meta.Pagination.HasNext)
+	assert.False(t, response.Meta.Pagination.HasPrev)
+}
+
+func TestListUsersEndpointReturnsEmptyCollectionWithSuccess(t *testing.T) {
+	e, _ := newAuthAPI(t)
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/users", nil)
+	recorder := httptest.NewRecorder()
+
+	e.ServeHTTP(recorder, request)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	var response listUserResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	assert.Empty(t, response.Data)
+	assert.Equal(t, int64(0), response.Meta.Pagination.TotalCount)
+}
+
+func TestListUsersEndpointReturnsValidationErrorForUnsupportedSortField(t *testing.T) {
+	e, _ := newAuthAPI(t)
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/users?sort=-password_hash", nil)
+	recorder := httptest.NewRecorder()
+
+	e.ServeHTTP(recorder, request)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, recorder.Code)
+	var response errorResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	assert.Equal(t, "validation_failed", response.Error.Code)
+	assert.Contains(t, response.Error.Details, "sort")
 }
