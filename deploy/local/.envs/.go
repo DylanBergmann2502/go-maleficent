@@ -8,6 +8,16 @@ LOG_FORMAT=console
 PPROF_ENDPOINTS_ENABLED=true
 # BACKGROUND_JOBS_CONCURRENCY=10
 
+# Mail Configuration (Mailpit)
+# ------------------------------------------------------------------------------
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+# MAIL_USERNAME=
+# MAIL_PASSWORD=
+MAIL_FROM=noreply@example.local
+# MAIL_FROM_NAME=
+# MAIL_TLS=false
+
 # CORS Configuration
 # ------------------------------------------------------------------------------
 # CORS_ALLOW_ORIGINS=*

@@ -20,6 +20,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      mailpit:
+        condition: service_started
       garage:
         condition: service_started
     env_file:
@@ -112,6 +114,13 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
 
   garage:
     image: dxflrs/garage:v2.3.0

@@ -60,6 +60,20 @@ type StorageConfig struct {
 	UsePathStyle    bool   `env:"S3_USE_PATH_STYLE" envDefault:"false"`
 }
 
+type MailConfig struct {
+	Host     string `env:"MAIL_HOST"`
+	Port     int    `env:"MAIL_PORT"`
+	Username string `env:"MAIL_USERNAME"`
+	Password string `env:"MAIL_PASSWORD"`
+	From     string `env:"MAIL_FROM"`
+	FromName string `env:"MAIL_FROM_NAME"`
+	TLS      bool   `env:"MAIL_TLS" envDefault:"false"`
+}
+
+func (c MailConfig) Configured() bool {
+	return c.Host != "" || c.Port != 0 || c.Username != "" || c.Password != "" || c.From != "" || c.FromName != ""
+}
+
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
@@ -69,4 +83,5 @@ type Config struct {
 	CORS     CORSConfig
 	Debug    DebugConfig
 	Storage  StorageConfig
+	Mail     MailConfig
 }

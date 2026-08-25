@@ -13,6 +13,7 @@ import (
 	apphandlers "github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/mailer"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/openapi"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/storage"
 	"github.com/go-playground/validator/v10"
@@ -23,11 +24,12 @@ import (
 // Application contains the configured HTTP application.
 type Application struct {
 	Echo    *echo.Echo
+	Mailer  *mailer.Mailer
 	Storage *storage.S3Storage
 }
 
 // New builds the HTTP application and wires its dependencies.
-func New(config *config.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client, objectStorage *storage.S3Storage) *Application {
+func New(config *config.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client, emailMailer *mailer.Mailer, objectStorage *storage.S3Storage) *Application {
 	e := echo.New()
 	e.Logger = logger
 
@@ -50,5 +52,5 @@ func New(config *config.Config, logger *slog.Logger, db *database.Database, jobC
 	apphandlers.RegisterRoutes(e, db)
 	debug.RegisterRoutes(e, config.Debug.PprofEndpointsEnabled)
 
-	return &Application{Echo: e, Storage: objectStorage}
+	return &Application{Echo: e, Mailer: emailMailer, Storage: objectStorage}
 }

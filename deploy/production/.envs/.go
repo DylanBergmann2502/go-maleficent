@@ -8,6 +8,16 @@ LOG_FORMAT=json
 PPROF_ENDPOINTS_ENABLED=false
 # BACKGROUND_JOBS_CONCURRENCY=10
 
+# Mail Configuration
+# ------------------------------------------------------------------------------
+MAIL_HOST=
+MAIL_PORT=
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM=
+MAIL_FROM_NAME=
+# MAIL_TLS=false
+
 # CORS Configuration
 # ------------------------------------------------------------------------------
 # CORS_ALLOW_ORIGINS=*

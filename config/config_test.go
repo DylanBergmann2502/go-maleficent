@@ -21,6 +21,9 @@ func setRequiredDatabaseEnvironment(t *testing.T) {
 	t.Setenv("DB_USER", "test-user")
 	t.Setenv("DB_PASSWORD", "test-password")
 	t.Setenv("S3_BUCKET", "test-bucket")
+	t.Setenv("MAIL_HOST", "mailpit")
+	t.Setenv("MAIL_PORT", "1025")
+	t.Setenv("MAIL_FROM", "noreply@example.local")
 }
 
 func unsetEnvironment(t *testing.T, key string) {

@@ -11,6 +11,7 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/mailer"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/storage"
 	"github.com/spf13/cobra"
 )
@@ -62,7 +63,14 @@ func runAPIServer() error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize object storage: %w", err)
 	}
-	application := application.New(config, logger, db, jobClient, s3Storage)
+	var emailMailer *mailer.Mailer
+	if config.Mail.Configured() {
+		emailMailer, err = mailer.New(&config.Mail)
+		if err != nil {
+			return fmt.Errorf("failed to initialize mailer: %w", err)
+		}
+	}
+	application := application.New(config, logger, db, jobClient, emailMailer, s3Storage)
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 	logging.Info(logger, "Server listening", slog.String("address", address))
 

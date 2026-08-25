@@ -21,12 +21,29 @@ func LoadConfig() (*Config, error) {
 	if err := validateStorageCredentials(config.Storage); err != nil {
 		return nil, err
 	}
+	if err := validateMailConfig(config.Mail); err != nil {
+		return nil, err
+	}
 
 	if strings.EqualFold(os.Getenv("GO_ENV"), "test") {
 		applyTestDatabaseName(&config)
 	}
 
 	return &config, nil
+}
+
+func validateMailConfig(mail MailConfig) error {
+	if !mail.Configured() {
+		return nil
+	}
+	if mail.Host == "" || mail.Port == 0 || mail.From == "" {
+		return fmt.Errorf("MAIL_HOST, MAIL_PORT, and MAIL_FROM must be provided together")
+	}
+	if (mail.Username == "") != (mail.Password == "") {
+		return fmt.Errorf("MAIL_USERNAME and MAIL_PASSWORD must be provided together")
+	}
+
+	return nil
 }
 
 func validateStorageCredentials(storage StorageConfig) error {

@@ -15,6 +15,7 @@ require (
 	github.com/lmittmann/tint v1.2.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
+	github.com/wneessen/go-mail v0.8.1
 	golang.org/x/crypto v0.55.0
 	gorm.io/driver/postgres v1.6.2
 	gorm.io/gorm v1.31.2
