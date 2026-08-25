@@ -34,3 +34,12 @@ DB_PASSWORD=AuLjZ5WZzj4F5V7FAv6aRmkvuc3W8jhSq1ek7RWOfvWIgWtJ8tHVALmo9tVibJzJ
 # DB_CONN_MAX_IDLE_TIME=15m
 # DB_TIMEZONE=UTC
 # POSTGRES_SSLMODE=disable
+
+# S3 Storage (Garage)
+# ------------------------------------------------------------------------------
+S3_ENDPOINT=http://garage:3900
+S3_REGION=garage
+S3_BUCKET=local-go-maleficent
+S3_ACCESS_KEY_ID=GK5461d36b1ebf0cf4ee601aee
+S3_SECRET_ACCESS_KEY=21022d6eec2f0020fee2c6f79544cbd620620b8542a71996a06d6bad9a5a6e0a
+S3_USE_PATH_STYLE=true

@@ -105,6 +105,16 @@ case "$1" in
         docker compose -f "$COMPOSE_FILE" --profile test run --build --rm go_test
         ;;
 
+    "setup")
+        # Initialize local Garage layout, credentials, and bucket
+        check_docker
+        if [ "$ENV" != "local" ]; then
+            echo "Error: Garage setup is only available for the local environment"
+            exit 1
+        fi
+        docker compose -f deploy/local/setup.yml up --build --abort-on-container-exit --exit-code-from setup_complete
+        ;;
+
     "deps")
         # Add or update Go module dependencies inside the Go container
         check_docker
@@ -158,6 +168,7 @@ case "$1" in
         echo "  format [path]       - Format Go code with goimports (defaults to .)"
         echo "  lint [options]      - Lint Go code with golangci-lint"
         echo "  test                - Run the Docker test profile"
+        echo "  setup               - Initialize local Garage storage"
         echo "  deps <module>...    - Add or update Go module dependencies"
         echo ""
         echo "Migration Commands:"

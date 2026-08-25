@@ -14,6 +14,7 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/openapi"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/storage"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
@@ -21,11 +22,12 @@ import (
 
 // Application contains the configured HTTP application.
 type Application struct {
-	Echo *echo.Echo
+	Echo    *echo.Echo
+	Storage *storage.S3Storage
 }
 
 // New builds the HTTP application and wires its dependencies.
-func New(config *config.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client) *Application {
+func New(config *config.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client, objectStorage *storage.S3Storage) *Application {
 	e := echo.New()
 	e.Logger = logger
 
@@ -48,5 +50,5 @@ func New(config *config.Config, logger *slog.Logger, db *database.Database, jobC
 	apphandlers.RegisterRoutes(e, db)
 	debug.RegisterRoutes(e, config.Debug.PprofEndpointsEnabled)
 
-	return &Application{Echo: e}
+	return &Application{Echo: e, Storage: objectStorage}
 }

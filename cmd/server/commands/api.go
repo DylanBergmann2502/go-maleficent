@@ -2,6 +2,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/database"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/jobs"
 	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/logging"
+	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/storage"
 	"github.com/spf13/cobra"
 )
 
@@ -56,7 +58,12 @@ func runAPIServer() error {
 		}
 	}()
 
-	application := application.New(config, logger, db, jobClient)
+	objectStorage, err := storage.NewS3Storage(context.Background(), &config.Storage)
+	if err != nil {
+		return fmt.Errorf("failed to initialize object storage: %w", err)
+	}
+
+	application := application.New(config, logger, db, jobClient, objectStorage)
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 	logging.Info(logger, "Server listening", slog.String("address", address))
 

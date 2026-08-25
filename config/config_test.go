@@ -20,6 +20,7 @@ func setRequiredDatabaseEnvironment(t *testing.T) {
 	t.Setenv("DB_NAME", "go_maleficent")
 	t.Setenv("DB_USER", "test-user")
 	t.Setenv("DB_PASSWORD", "test-password")
+	t.Setenv("S3_BUCKET", "test-bucket")
 }
 
 func unsetEnvironment(t *testing.T, key string) {
@@ -120,4 +121,15 @@ func TestLoadConfigRejectsMissingRequiredEnvironment(t *testing.T) {
 	_, err := LoadConfig()
 
 	require.Error(t, err)
+}
+
+func TestLoadConfigAcceptsStorageWithStaticCredentials(t *testing.T) {
+	setRequiredDatabaseEnvironment(t)
+	t.Setenv("S3_ACCESS_KEY_ID", "access-key")
+	t.Setenv("S3_SECRET_ACCESS_KEY", "secret-key")
+
+	config, err := LoadConfig()
+
+	require.NoError(t, err)
+	assert.Equal(t, "test-bucket", config.Storage.Bucket)
 }

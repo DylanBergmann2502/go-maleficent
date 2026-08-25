@@ -5,6 +5,8 @@ volumes:
   postgres_data: {}
   postgres_data_backups: {}
   redis_data: {}
+  garage_meta: {}
+  garage_data: {}
 
 services:
   go:
@@ -17,6 +19,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_started
+      garage:
         condition: service_started
     env_file:
       - ./.envs/.go
@@ -37,6 +41,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      garage:
+        condition: service_started
     env_file:
       - ./.envs/.go
     volumes:
@@ -53,6 +59,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_started
+      garage:
         condition: service_started
     env_file:
       - ./.envs/.go
@@ -104,3 +112,20 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  garage:
+    image: dxflrs/garage:v2.3.0
+    container_name: garage
+    volumes:
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+      - ./compose/garage/garage.toml:/etc/garage.toml:ro
+    ports:
+      - "3900:3900"
+      - "3903:3903"
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s

@@ -50,6 +50,15 @@ type DebugConfig struct {
 	PprofEndpointsEnabled bool `env:"PPROF_ENDPOINTS_ENABLED" envDefault:"false"`
 }
 
+type StorageConfig struct {
+	Endpoint        string `env:"S3_ENDPOINT"`
+	Region          string `env:"S3_REGION" envDefault:"us-east-1"`
+	Bucket          string `env:"S3_BUCKET,required"`
+	AccessKeyID     string `env:"S3_ACCESS_KEY_ID"`
+	SecretAccessKey string `env:"S3_SECRET_ACCESS_KEY"`
+	UsePathStyle    bool   `env:"S3_USE_PATH_STYLE" envDefault:"false"`
+}
+
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
@@ -58,4 +67,5 @@ type Config struct {
 	Log      LogConfig
 	CORS     CORSConfig
 	Debug    DebugConfig
+	Storage  StorageConfig
 }

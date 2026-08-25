@@ -1,0 +1,53 @@
+# deploy/local/setup.yml
+name: go_maleficent_local
+
+volumes:
+  garage_meta: {}
+  garage_data: {}
+
+services:
+  garage:
+    image: dxflrs/garage:v2.3.0
+    container_name: garage
+    volumes:
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+      - ./compose/garage/garage.toml:/etc/garage.toml:ro
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  create_garage_bucket:
+    build:
+      context: ../..
+      dockerfile: ./deploy/local/compose/garage/Dockerfile.init
+    container_name: create_garage_bucket
+    volumes:
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+      - ./compose/garage/garage.toml:/etc/garage.toml:ro
+    depends_on:
+      garage:
+        condition: service_healthy
+    env_file:
+      - ./.envs/.garage
+    entrypoint: >
+      sh -c "
+        NODE_ID=$$(/garage node id -q 2>/dev/null | cut -d@ -f1) &&
+        /garage layout assign -z local -c 1G $$NODE_ID || true &&
+        /garage layout apply --version 1 || true &&
+        /garage bucket create local-go-maleficent || true &&
+        /garage key import --yes -n local-go-maleficent-key $$GARAGE_ACCESS_KEY_ID $$GARAGE_SECRET_ACCESS_KEY || true &&
+        /garage bucket allow --read --write --owner local-go-maleficent --key local-go-maleficent-key
+      "
+
+  setup_complete:
+    image: alpine:latest
+    container_name: setup_complete
+    depends_on:
+      create_garage_bucket:
+        condition: service_completed_successfully
+    command: sh -c "echo 'Setup completed successfully' && exit 0"
