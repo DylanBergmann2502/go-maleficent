@@ -1,0 +1,88 @@
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  pull_request:
+    branches: ["main", "master"]
+  push:
+    branches: ["main", "master"]
+
+env:
+  DOCKER_BUILDKIT: "1"
+  COMPOSE_DOCKER_CLI_BUILD: "1"
+  COMPOSE_FILE: deploy/local/web.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config --quiet
+
+      - name: Build Go development image
+        run: docker compose build go
+
+      - name: Check Go formatting
+        run: |
+          formatting_output="$(docker compose run --rm --no-deps go goimports -l .)"
+          if [ -n "$formatting_output" ]; then
+            echo "$formatting_output"
+            echo "Go files are not formatted. Run ./bin/run format."
+            exit 1
+          fi
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build Go development image
+        run: docker compose build go
+
+      - name: Run golangci-lint
+        run: docker compose run --rm --no-deps go golangci-lint run
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Run Docker test profile
+        run: docker compose --profile test run --build --rm go_test
+
+      - name: Tear down test containers
+        if: always()
+        run: docker compose down -v --remove-orphans
+
+  build:
+    name: Production image build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [format, lint, test]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Validate production Docker Compose configuration
+        run: docker compose -f deploy/production/web.yml config --quiet
+
+      - name: Build production Go image
+        run: docker compose -f deploy/production/web.yml build go
