@@ -5,18 +5,23 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"path"
+	"strings"
+	"time"
 
 	"github.com/DylanBergmann2502/go-maleficent/config"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/google/uuid"
 )
 
 // S3Storage provides object storage backed by Amazon S3 or an S3-compatible service.
 type S3Storage struct {
-	client *s3.Client
-	bucket string
+	client   *s3.Client
+	bucket   string
+	location string
 }
 
 // NewS3Storage creates an S3 client configured for Amazon S3, Garage, or another
@@ -47,11 +52,34 @@ func NewS3Storage(ctx context.Context, storageConfig *config.StorageConfig) (*S3
 		}
 	})
 
-	return &S3Storage{client: client, bucket: storageConfig.Bucket}, nil
+	return &S3Storage{
+		client:   client,
+		bucket:   storageConfig.Bucket,
+		location: strings.Trim(storageConfig.Location, "/"),
+	}, nil
+}
+
+// Save uploads an object and returns its storage key.
+func (s *S3Storage) Save(ctx context.Context, filename, contentType string, body io.Reader) (string, error) {
+	objectID, err := uuid.NewV7()
+	if err != nil {
+		return "", fmt.Errorf("generate storage object ID: %w", err)
+	}
+
+	filename = cleanFilename(filename)
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	key := path.Join(s.location, objectID.String(), filename)
+	if _, err := s.Put(ctx, key, body, contentType); err != nil {
+		return "", err
+	}
+
+	return key, nil
 }
 
 // Put stores an object in the configured bucket.
-func (s *S3Storage) Put(ctx context.Context, key string, body io.Reader, contentType string) error {
+func (s *S3Storage) Put(ctx context.Context, key string, body io.Reader, contentType string) (*s3.PutObjectOutput, error) {
 	input := &s3.PutObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(key),
@@ -61,8 +89,7 @@ func (s *S3Storage) Put(ctx context.Context, key string, body io.Reader, content
 		input.ContentType = aws.String(contentType)
 	}
 
-	_, err := s.client.PutObject(ctx, input)
-	return err
+	return s.client.PutObject(ctx, input)
 }
 
 // Get retrieves an object from the configured bucket. The caller must close the
@@ -89,4 +116,29 @@ func (s *S3Storage) Health(ctx context.Context) error {
 		Bucket: aws.String(s.bucket),
 	})
 	return err
+}
+
+// URL returns a temporary URL for reading an object.
+func (s *S3Storage) URL(ctx context.Context, key string, expiry time.Duration) (string, error) {
+	presigner := s3.NewPresignClient(s.client)
+	presigned, err := presigner.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(key),
+	}, func(options *s3.PresignOptions) {
+		options.Expires = expiry
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return presigned.URL, nil
+}
+
+func cleanFilename(filename string) string {
+	filename = strings.TrimSpace(strings.ReplaceAll(filename, "\\", "/"))
+	filename = path.Base(filename)
+	if filename == "." || filename == "/" || filename == "" {
+		return "file"
+	}
+	return filename
 }

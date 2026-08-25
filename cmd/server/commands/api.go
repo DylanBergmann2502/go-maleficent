@@ -58,12 +58,11 @@ func runAPIServer() error {
 		}
 	}()
 
-	objectStorage, err := storage.NewS3Storage(context.Background(), &config.Storage)
+	s3Storage, err := storage.NewS3Storage(context.Background(), &config.Storage)
 	if err != nil {
 		return fmt.Errorf("failed to initialize object storage: %w", err)
 	}
-
-	application := application.New(config, logger, db, jobClient, objectStorage)
+	application := application.New(config, logger, db, jobClient, s3Storage)
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 	logging.Info(logger, "Server listening", slog.String("address", address))
 
