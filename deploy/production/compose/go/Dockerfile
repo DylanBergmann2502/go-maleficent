@@ -42,8 +42,7 @@ WORKDIR /app
 
 # Create bin directory and copy built application from build stage
 RUN mkdir -p bin
-COPY --from=go-build-stage /app/bin/server ./bin/server
-RUN chmod +x ./bin/server
+COPY --from=go-build-stage --chown=app:app --chmod=0755 /app/bin/server ./bin/server
 
 # Copy production scripts
 COPY ./deploy/production/compose/go/entrypoint /entrypoint
@@ -56,8 +55,7 @@ RUN sed -i 's/\r$//g' /entrypoint \
     && sed -i 's/\r$//g' /start \
     && sed -i 's/\r$//g' /worker \
     && sed -i 's/\r$//g' /cron \
-    && chmod +x /entrypoint /start /worker /cron \
-    && chown -R app:app /app
+    && chmod +x /entrypoint /start /worker /cron
 
 # Switch to non-root user
 USER app

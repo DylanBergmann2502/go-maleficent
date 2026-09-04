@@ -34,19 +34,29 @@ COPY go.mod ./
 COPY go.su[m] ./
 
 # Download dependencies
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
 
 # Install Air globally for hot reload
-RUN go install github.com/air-verse/air@latest
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go install github.com/air-verse/air@latest
 
 # Install goimports for formatting
-RUN go install golang.org/x/tools/cmd/goimports@latest
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go install golang.org/x/tools/cmd/goimports@latest
 
 # Install golangci-lint for linting (v2)
-RUN go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 
 # Install golang-migrate CLI for migrations
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 # Copy source code
 COPY . .
