@@ -7,14 +7,14 @@ volumes:
 
 services:
   garage:
-    image: dxflrs/garage:v2.3.0
+    image: dxflrs/garage:v2.4.1
     container_name: garage
     volumes:
       - garage_meta:/var/lib/garage/meta
       - garage_data:/var/lib/garage/data
       - ./compose/garage/garage.toml:/etc/garage.toml:ro
     healthcheck:
-      test: ["CMD", "/garage", "status"]
+      test: ["CMD", "/garage", "health", "--quiet"]
       interval: 5s
       timeout: 5s
       retries: 10

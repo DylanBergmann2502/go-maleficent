@@ -123,7 +123,7 @@ services:
       - "1025:1025"
 
   garage:
-    image: dxflrs/garage:v2.3.0
+    image: dxflrs/garage:v2.4.1
     container_name: garage
     volumes:
       - garage_meta:/var/lib/garage/meta
@@ -133,7 +133,7 @@ services:
       - "3900:3900"
       - "3903:3903"
     healthcheck:
-      test: ["CMD", "/garage", "status"]
+      test: ["CMD", "/garage", "health", "--quiet"]
       interval: 5s
       timeout: 5s
       retries: 10
