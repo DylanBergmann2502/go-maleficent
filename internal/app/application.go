@@ -29,7 +29,7 @@ type Application struct {
 }
 
 // New builds the HTTP application and wires its dependencies.
-func New(config *config.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client, emailMailer *mailer.Mailer, objectStorage *storage.S3Storage) *Application {
+func New(cfg *config.Config, logger *slog.Logger, db *database.Database, jobClient *jobs.Client, emailMailer *mailer.Mailer, objectStorage *storage.S3Storage) *Application {
 	e := echo.New()
 	e.Logger = logger
 
@@ -37,9 +37,9 @@ func New(config *config.Config, logger *slog.Logger, db *database.Database, jobC
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     config.CORS.AllowOrigins,
-		AllowCredentials: config.CORS.AllowCredentials,
-		AllowHeaders:     config.CORS.AllowHeaders,
+		AllowOrigins:     cfg.CORS.AllowOrigins,
+		AllowCredentials: cfg.CORS.AllowCredentials,
+		AllowHeaders:     cfg.CORS.AllowHeaders,
 	}))
 	e.Use(logging.SlogLoggerMiddleware(logger))
 
@@ -50,7 +50,7 @@ func New(config *config.Config, logger *slog.Logger, db *database.Database, jobC
 	humaAPI := openapi.New(e)
 	auth.RegisterRoutes(humaAPI, userHandler)
 	apphandlers.RegisterRoutes(e, db)
-	debug.RegisterRoutes(e, config.Debug.PprofEndpointsEnabled)
+	debug.RegisterRoutes(e, cfg.Debug.PprofEndpointsEnabled)
 
 	return &Application{Echo: e, Mailer: emailMailer, Storage: objectStorage}
 }

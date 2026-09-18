@@ -51,16 +51,16 @@ func newMigrateDownCommand() *cobra.Command {
 }
 
 func runMigrateUp(args []string) (err error) {
-	config, err := config.LoadConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
-	logger, err := logging.NewLogger(&config.Log)
+	logger, err := logging.NewLogger(&cfg.Log)
 	if err != nil {
 		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
-	migrator, err := database.NewMigrator(&config.Database)
+	migrator, err := database.NewMigrator(&cfg.Database)
 	if err != nil {
 		return fmt.Errorf("failed to create migrator: %w", err)
 	}
@@ -82,16 +82,16 @@ func runMigrateUp(args []string) (err error) {
 }
 
 func runMigrateDown(args []string) (err error) {
-	config, err := config.LoadConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
-	logger, err := logging.NewLogger(&config.Log)
+	logger, err := logging.NewLogger(&cfg.Log)
 	if err != nil {
 		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
-	migrator, err := database.NewMigrator(&config.Database)
+	migrator, err := database.NewMigrator(&cfg.Database)
 	if err != nil {
 		return fmt.Errorf("failed to create migrator: %w", err)
 	}

@@ -29,17 +29,17 @@ func NewAPICommand() *cobra.Command {
 }
 
 func runAPIServer() error {
-	config, err := config.LoadConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	logger, err := logging.NewLogger(&config.Log)
+	logger, err := logging.NewLogger(&cfg.Log)
 	if err != nil {
 		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
-	db, err := database.NewDatabase(&config.Database, logger)
+	db, err := database.NewDatabase(&cfg.Database, logger)
 	if err != nil {
 		return fmt.Errorf("failed to initialize database: %w", err)
 	}
@@ -49,7 +49,7 @@ func runAPIServer() error {
 		}
 	}()
 
-	jobClient, err := jobs.NewClient(config)
+	jobClient, err := jobs.NewClient(cfg)
 	if err != nil {
 		return fmt.Errorf("failed to initialize background job client: %w", err)
 	}
@@ -59,22 +59,22 @@ func runAPIServer() error {
 		}
 	}()
 
-	s3Storage, err := storage.NewS3Storage(context.Background(), &config.Storage)
+	s3Storage, err := storage.NewS3Storage(context.Background(), &cfg.Storage)
 	if err != nil {
 		return fmt.Errorf("failed to initialize object storage: %w", err)
 	}
 	var emailMailer *mailer.Mailer
-	if config.Mail.Configured() {
-		emailMailer, err = mailer.New(&config.Mail)
+	if cfg.Mail.Configured() {
+		emailMailer, err = mailer.New(&cfg.Mail)
 		if err != nil {
 			return fmt.Errorf("failed to initialize mailer: %w", err)
 		}
 	}
-	application := application.New(config, logger, db, jobClient, emailMailer, s3Storage)
-	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
+	app := application.New(cfg, logger, db, jobClient, emailMailer, s3Storage)
+	address := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	logging.Info(logger, "Server listening", slog.String("address", address))
 
-	if err := application.Echo.Start(address); err != nil {
+	if err := app.Echo.Start(address); err != nil {
 		logger.Error("Server stopped", slog.Any("error", err))
 		return err
 	}

@@ -19,10 +19,10 @@ func NewDatabaseClient(t *testing.T) *databasepkg.Database {
 
 	require.Equal(t, "test", os.Getenv("GO_ENV"), "tests must run with GO_ENV=test")
 
-	config, err := config.LoadConfig()
+	cfg, err := config.LoadConfig()
 	require.NoError(t, err)
 
-	database, err := databasepkg.NewDatabase(&config.Database, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	database, err := databasepkg.NewDatabase(&cfg.Database, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.NoError(t, err)
 
 	t.Cleanup(func() {

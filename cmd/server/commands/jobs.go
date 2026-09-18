@@ -32,17 +32,17 @@ func NewCronCommand() *cobra.Command {
 }
 
 func loadJobsDependencies() (*config.Config, *slog.Logger, error) {
-	config, err := config.LoadConfig()
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
-	logger, err := logging.NewLogger(&config.Log)
+	logger, err := logging.NewLogger(&cfg.Log)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
-	return config, logger, nil
+	return cfg, logger, nil
 }
 
 func runWorker() error {
