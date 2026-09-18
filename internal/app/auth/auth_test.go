@@ -192,3 +192,71 @@ func TestListUsersEndpointReturnsValidationErrorForUnsupportedSortField(t *testi
 	assert.Equal(t, "validation_failed", response.Error.Code)
 	assert.Contains(t, response.Error.Details, "sort")
 }
+
+func TestGetUserEndpointReturnsUser(t *testing.T) {
+	e, db := newAuthAPI(t)
+	id := uuid.New()
+	require.NoError(t, db.Exec(
+		"INSERT INTO users (id, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())",
+		id, "user@example.com", "argon2-hash",
+	).Error)
+
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/users/"+id.String(), nil)
+	recorder := httptest.NewRecorder()
+
+	e.ServeHTTP(recorder, request)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	var response userResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	assert.Equal(t, id.String(), response.Data.ID)
+	assert.Equal(t, "user@example.com", response.Data.Email)
+}
+
+func TestUpdateUserEndpointUpdatesUser(t *testing.T) {
+	e, db := newAuthAPI(t)
+	id := uuid.New()
+	require.NoError(t, db.Exec(
+		"INSERT INTO users (id, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())",
+		id, "user@example.com", "argon2-hash",
+	).Error)
+
+	request := httptest.NewRequest(
+		http.MethodPatch,
+		"/api/v1/users/"+id.String(),
+		bytes.NewBufferString(`{"email":" Updated@Example.COM ","password":"updated horse battery staple"}`),
+	)
+	request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	recorder := httptest.NewRecorder()
+
+	e.ServeHTTP(recorder, request)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	var response userResponse
+	require.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &response))
+	assert.Equal(t, id.String(), response.Data.ID)
+	assert.Equal(t, "updated@example.com", response.Data.Email)
+
+	var passwordHash string
+	require.NoError(t, db.Raw("SELECT password_hash FROM users WHERE id = ?", id).Scan(&passwordHash).Error)
+	assert.NotEqual(t, "argon2-hash", passwordHash)
+}
+
+func TestDeleteUserEndpointDeletesUser(t *testing.T) {
+	e, db := newAuthAPI(t)
+	id := uuid.New()
+	require.NoError(t, db.Exec(
+		"INSERT INTO users (id, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())",
+		id, "user@example.com", "argon2-hash",
+	).Error)
+
+	request := httptest.NewRequest(http.MethodDelete, "/api/v1/users/"+id.String(), nil)
+	recorder := httptest.NewRecorder()
+
+	e.ServeHTTP(recorder, request)
+
+	assert.Equal(t, http.StatusNoContent, recorder.Code)
+	var count int64
+	require.NoError(t, db.Raw("SELECT COUNT(*) FROM users WHERE id = ?", id).Scan(&count).Error)
+	assert.Zero(t, count)
+}
