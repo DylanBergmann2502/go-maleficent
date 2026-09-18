@@ -11,15 +11,13 @@ import (
 
 // HealthHandler exposes application-wide liveness and readiness endpoints.
 type HealthHandler struct {
-	*BaseHandler
 	db *database.Database
 }
 
 // NewHealthHandler creates a health handler backed by the application database.
 func NewHealthHandler(db *database.Database) *HealthHandler {
 	return &HealthHandler{
-		BaseHandler: &BaseHandler{},
-		db:          db,
+		db: db,
 	}
 }
 

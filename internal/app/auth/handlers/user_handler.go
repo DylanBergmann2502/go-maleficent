@@ -9,18 +9,15 @@ import (
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/queries"
 	"github.com/DylanBergmann2502/go-maleficent/internal/app/auth/services"
 	apiresponses "github.com/DylanBergmann2502/go-maleficent/internal/pkg/api/responses"
-	"github.com/DylanBergmann2502/go-maleficent/internal/pkg/handlers"
 )
 
 type UserHandler struct {
-	*handlers.BaseHandler
 	service *services.UserService
 }
 
 func NewUserHandler(service *services.UserService) *UserHandler {
 	return &UserHandler{
-		BaseHandler: &handlers.BaseHandler{},
-		service:     service,
+		service: service,
 	}
 }
 
