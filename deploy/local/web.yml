@@ -132,9 +132,3 @@ services:
     ports:
       - "3900:3900"
       - "3903:3903"
-    healthcheck:
-      test: ["CMD", "/garage", "status"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
