@@ -133,7 +133,7 @@ services:
       - "3900:3900"
       - "3903:3903"
     healthcheck:
-      test: ["CMD", "/garage", "health", "--quiet"]
+      test: ["CMD", "/garage", "status"]
       interval: 5s
       timeout: 5s
       retries: 10

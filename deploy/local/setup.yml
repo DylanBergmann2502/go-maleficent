@@ -14,7 +14,7 @@ services:
       - garage_data:/var/lib/garage/data
       - ./compose/garage/garage.toml:/etc/garage.toml:ro
     healthcheck:
-      test: ["CMD", "/garage", "health", "--quiet"]
+      test: ["CMD", "/garage", "status"]
       interval: 5s
       timeout: 5s
       retries: 10
