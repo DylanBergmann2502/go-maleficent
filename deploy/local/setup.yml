@@ -7,7 +7,7 @@ volumes:
 
 services:
   garage:
-    image: dxflrs/garage:v2.4.1
+    image: dxflrs/garage:v2.5.0
     container_name: garage
     volumes:
       - garage_meta:/var/lib/garage/meta
